@@ -42,9 +42,9 @@ export const POST: APIRoute = async ({ request }) => {
     // 3. Obtener la API Key de Resend de forma segura en el servidor
     const resendApiKey = import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY;
     
-    // Si la llave sigue siendo el valor por defecto o no está configurada, avisar con un error claro
-    if (!resendApiKey || resendApiKey === 're_tu_llave_aqui') {
-      console.error('[Resend Error]: RESEND_API_KEY no está configurada en las variables de entorno (.env)');
+    // Si la llave no está configurada, avisar con un error claro
+    if (!resendApiKey) {
+      console.error('[Resend Error]: RESEND_API_KEY no está configurada en las variables de entorno');
       return new Response(
         JSON.stringify({ error: 'El servidor de correo no está configurado (Llave API ausente)' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
