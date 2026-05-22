@@ -1,0 +1,510 @@
+---
+// Contact.astro - Contact section and footer
+---
+
+<section class="contact-container" id="contacto">
+  <!-- Section Title -->
+  <div class="section-title">
+    <span class="icon-brackets">&lt;/&gt;</span>
+    <h2>Hablemos / Contacto</h2>
+  </div>
+
+  <div class="glass-card contact-card">
+    <div class="contact-info">
+      <h3>¿Tienes un proyecto en mente?</h3>
+      <p>
+        Estoy disponible para oportunidades de empleo a tiempo completo, proyectos freelance o consultorías técnicas. Escríbeme a través del formulario y hablemos sobre cómo puedo aportar valor a tu equipo.
+      </p>
+
+      <div class="contact-methods">
+        <!-- LinkedIn -->
+        <a href="https://linkedin.com/in/rogeliolb" target="_blank" rel="noopener noreferrer" class="contact-method-item">
+          <div class="method-icon linkedin-icon">
+            <svg fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+            </svg>
+          </div>
+          <div class="method-details">
+            <span class="method-label">LinkedIn Profesional</span>
+            <span class="method-value">linkedin.com/in/rogeliolb</span>
+          </div>
+        </a>
+
+        <!-- Location -->
+        <div class="contact-method-item no-link">
+          <div class="method-icon location-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <div class="method-details">
+            <span class="method-label">Ubicación</span>
+            <span class="method-value">Sinaloa, México (Remoto)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clean Premium Form with safe Resend Integration -->
+    <form class="contact-form" id="contact-form-el">
+      <div class="form-group">
+        <label for="name">Nombre Completo</label>
+        <input type="text" id="name" name="name" required placeholder="Ingresa tu nombre..." />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Correo de Contacto</label>
+        <input type="email" id="email" name="email" required placeholder="tu@correo.com" />
+      </div>
+
+      <div class="form-group">
+        <label for="message">Mensaje / Propuesta</label>
+        <textarea id="message" name="message" rows="4" required placeholder="Hola Rogelio, me gustaría conversar sobre..."></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit" id="btn-send-message">
+        Enviar Mensaje
+        <svg class="btn-submit-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+
+  <!-- Elegant floating Toast container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Small Elegant Footer -->
+  <footer class="footer">
+    <p>© {new Date().getFullYear()} · Diseñado y desarrollado por Rogelio López con Astro.</p>
+  </footer>
+</section>
+
+<script>
+  // Función para mostrar Toasts dinámicos
+  function showToast(message: string, type: 'info' | 'success' | 'error' = 'info') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    // Crear el elemento de la alerta toast
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    let iconSvg = '';
+    if (type === 'success') {
+      iconSvg = `
+        <svg class="toast-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      `;
+    } else if (type === 'error') {
+      iconSvg = `
+        <svg class="toast-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      `;
+    } else {
+      // Spinner loading icon
+      iconSvg = `
+        <svg class="toast-icon spinning" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" style="opacity: 0.25; fill: none;"></circle>
+          <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      `;
+    }
+
+    toast.innerHTML = `
+      ${iconSvg}
+      <span class="toast-message">${message}</span>
+    `;
+
+    container.appendChild(toast);
+
+    // Eliminar automáticamente del DOM después de 5 segundos (cuando acaban las animaciones)
+    setTimeout(() => {
+      toast.style.animation = 'toast-fade-out 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+      setTimeout(() => {
+        toast.remove();
+      }, 400);
+    }, 4600);
+  }
+
+  // Interceptar el envío del formulario
+  const form = document.getElementById('contact-form-el') as HTMLFormElement;
+  const submitBtn = document.getElementById('btn-send-message') as HTMLButtonElement;
+
+  if (form && submitBtn) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Guardar el contenido y deshabilitar para evitar doble envío
+      const originalBtnContent = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.7';
+      submitBtn.innerHTML = `
+        Enviando...
+        <svg class="btn-submit-icon spinning" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" style="opacity: 0.25; fill: none;"></circle>
+          <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      `;
+
+      showToast('Enviando tu mensaje a Rogelio...', 'info');
+
+      const formData = new FormData(form);
+      const payload = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        message: formData.get('message'),
+      };
+
+      try {
+        const response = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          showToast('¡Mensaje enviado con éxito! Te responderé lo antes posible.', 'success');
+          form.reset();
+        } else {
+          showToast(result.error || 'Error al enviar el mensaje. Inténtalo de nuevo.', 'error');
+        }
+      } catch (err) {
+        showToast('Error de conexión. Verifica tu internet e inténtalo de nuevo.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.innerHTML = originalBtnContent;
+      }
+    });
+  }
+</script>
+
+<style>
+  .contact-container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 2rem 1.5rem 1.5rem 1.5rem;
+  }
+
+  /* Title styling */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .icon-brackets {
+    font-family: var(--font-headers);
+    color: var(--primary-light);
+    font-size: 1.6rem;
+    font-weight: 800;
+  }
+
+  .section-title h2 {
+    font-size: 1.8rem;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+  }
+
+  /* Contact Card split design */
+  .contact-card {
+    padding: 2.5rem;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .contact-info h3 {
+    font-size: 1.3rem;
+    color: var(--text-main);
+    margin-bottom: 0.75rem;
+  }
+
+  .contact-info p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+
+  /* Contact methods list */
+  .contact-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .contact-method-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius-md);
+    background-color: var(--white-bg);
+    border: 1px solid var(--card-border);
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .contact-method-item:not(.no-link):hover {
+    transform: translateX(4px);
+    border-color: var(--primary-light);
+    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.05);
+  }
+
+  .method-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #FFFFFF;
+    flex-shrink: 0;
+  }
+
+  .method-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .linkedin-icon { background: linear-gradient(135deg, #0077B5 0%, #00a0dc 100%); }
+  .location-icon { background: linear-gradient(135deg, #4B5563 0%, #6B7280 100%); }
+
+  .method-details {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .method-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .method-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  /* Form styling */
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    justify-content: center;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 0.8rem 1rem;
+    border-radius: var(--border-radius-sm);
+    border: 1.5px solid var(--card-border);
+    background-color: var(--white-bg);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: var(--text-main);
+    transition: all 0.2s ease;
+    width: 100%;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+  }
+
+  /* Submit button styling */
+  .btn-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.9rem 1.75rem;
+    border-radius: var(--border-radius-full);
+    background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+    border: none;
+    color: #FFFFFF;
+    font-family: var(--font-headers);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.25);
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(109, 40, 217, 0.4);
+  }
+
+  .btn-submit-icon {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease;
+  }
+
+  .btn-submit:hover .btn-submit-icon {
+    transform: translateX(4px);
+  }
+
+  /* Premium Toast System */
+  .toast-container {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    z-index: 1000;
+    pointer-events: none;
+    max-width: 380px;
+    width: calc(100% - 4rem);
+  }
+
+  .toast {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1rem 1.4rem;
+    border-radius: var(--border-radius-md);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(109, 40, 217, 0.15);
+    box-shadow: 0 10px 30px -5px rgba(109, 40, 217, 0.15), 0 5px 15px -5px rgba(0, 0, 0, 0.05);
+    color: var(--text-main);
+    font-family: var(--font-headers);
+    font-size: 0.9rem;
+    font-weight: 600;
+    pointer-events: auto;
+    animation: toast-fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: bottom right;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .toast::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background: var(--primary-light);
+    animation: toast-progress 4.6s linear forwards;
+  }
+
+  .toast-success {
+    border-color: rgba(34, 197, 94, 0.3);
+  }
+  .toast-success::before {
+    background: #22C55E;
+  }
+
+  .toast-error {
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+  .toast-error::before {
+    background: #EF4444;
+  }
+
+  .toast-info {
+    border-color: rgba(109, 40, 217, 0.25);
+  }
+  .toast-info::before {
+    background: var(--primary);
+  }
+
+  .toast-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .toast-success .toast-icon { color: #16A34A; }
+  .toast-error .toast-icon { color: #DC2626; }
+  .toast-info .toast-icon { color: var(--primary-light); }
+
+  .toast-message {
+    line-height: 1.4;
+  }
+
+  @keyframes toast-fade-in {
+    from { opacity: 0; transform: translateY(1.5rem) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes toast-fade-out {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(-1rem) scale(0.9); }
+  }
+
+  @keyframes toast-progress {
+    from { width: 100%; }
+    to { width: 0%; }
+  }
+
+  /* Spinner Animation */
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .spinning {
+    animation: spin 1s linear infinite;
+  }
+
+  /* Footer styling */
+  .footer {
+    border-top: 1px dashed rgba(109, 40, 217, 0.15);
+    padding-top: 1.5rem;
+    text-align: center;
+    margin-top: 1rem;
+  }
+
+  .footer p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* Responsiveness */
+  @media (max-width: 650px) {
+    .contact-card {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      padding: 1.5rem;
+    }
+    
+    .toast-container {
+      bottom: 1rem;
+      right: 1rem;
+      width: calc(100% - 2rem);
+    }
+  }
+</style>

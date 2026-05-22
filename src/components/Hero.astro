@@ -1,0 +1,425 @@
+---
+// Hero.astro - Core Hero section with avatar and floating chat bubbles
+---
+
+<header class="hero-container">
+  <!-- Social Icons Top Right -->
+  <div class="social-header">
+    <a href="https://github.com/RogelioLB" target="_blank" rel="noopener noreferrer" aria-label="GitHub de Rogelio" class="social-icon-link">
+      <svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/>
+      </svg>
+    </a>
+    <a href="https://twitter.com/RogelioLB" target="_blank" rel="noopener noreferrer" aria-label="Twitter de Rogelio" class="social-icon-link">
+      <svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>
+    </a>
+  </div>
+
+  <!-- Avatar & Floating Bubbles Area -->
+  <div class="avatar-interactive-wrapper">
+    <div class="avatar-wrapper">
+      <!-- Flat color gradient placeholder for the avatar until the user sets their image -->
+      <div class="avatar-flat-placeholder">
+        <span class="avatar-initials">RL</span>
+        <div class="avatar-shine"></div>
+      </div>
+    </div>
+
+    <!-- Speech Bubble 1: Disponible para trabajar (Top Right) -->
+    <div class="speech-bubble bubble-green float-slow">
+      <span class="pulse-dot"></span>
+      <span class="bubble-text">Disponible para trabajar</span>
+      <div class="bubble-tail tail-bottom-left"></div>
+    </div>
+
+    <!-- Speech Bubble 2: 👋 Hola, soy Rogelio (Middle Right) -->
+    <div class="speech-bubble bubble-white float-medium">
+      <span class="bubble-text bold-text"><span class="hand-wave">👋</span> Hola, soy Rogelio</span>
+      <div class="bubble-tail tail-left"></div>
+    </div>
+
+    <!-- Speech Bubble 3: Desarrollador Web (Bottom) -->
+    <div class="speech-bubble bubble-purple float-fast">
+      <span class="bubble-text purple-text">Desarrollador Web</span>
+      <div class="bubble-tail tail-top-left"></div>
+    </div>
+  </div>
+
+  <!-- Intro Bio text -->
+  <div class="intro-content">
+    <p class="profile-paragraph">
+      Ingeniero de Software especializado en desarrollo full-stack con <strong>JavaScript/TypeScript</strong>. Experiencia construyendo productos SaaS, sistemas multi-tenant, integraciones de pagos con <strong>Mercado Pago</strong> y automatizaciones con <strong>WhatsApp Business API</strong>. Me caracterizo por el aprendizaje continuo, proactividad y capacidad para entregar soluciones escalables de principio a fin, desde la base de datos hasta la interfaz de usuario.
+    </p>
+  </div>
+
+  <!-- Action CTA Buttons -->
+  <div class="cta-actions">
+    <a href="#contacto" class="btn btn-outline" id="cta-contact">
+      <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+      Contactame
+    </a>
+    <a href="https://linkedin.com/in/rogeliolb" target="_blank" rel="noopener noreferrer" class="btn btn-outline" id="cta-linkedin">
+      <svg class="btn-icon" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+      </svg>
+      LinkedIn
+    </a>
+  </div>
+</header>
+
+<style>
+  .hero-container {
+    max-width: 880px; /* Expanded from 768px to minimize empty margins and scale up the hero */
+    margin: 0 auto;
+    padding: 3.5rem 2rem 4.5rem 2rem; /* Increased vertical and horizontal padding */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  /* Social Icons header */
+  .social-header {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .social-icon-link {
+    color: var(--text-main);
+    opacity: 0.8;
+    transition: all 0.2s ease;
+  }
+
+  .social-icon-link:hover {
+    color: var(--primary);
+    opacity: 1;
+    transform: scale(1.1);
+  }
+
+  .svg-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Interactive Avatar & Floating Bubbles Area */
+  .avatar-interactive-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 540px; /* Expanded space for left-aligned scaled up avatar and bubbles */
+    height: 320px; /* Centered height to accommodate scaled up avatar & bubbles beautifully */
+    margin-bottom: 2.5rem;
+  }
+
+  /* Avatar Styling */
+  .avatar-wrapper {
+    position: absolute;
+    left: 20px; /* Placed left of the bubbles */
+    top: 50%;
+    transform: translateY(-50%); /* Centered vertically relative to the speech bubbles */
+    width: 195px; /* Enlarged significantly for a premium bold presentation */
+    height: 195px; /* Enlarged significantly */
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7C3AED 0%, #D8B4FE 100%);
+    padding: 5px; /* Premium thicker gradient ring */
+    box-shadow: var(--shadow-avatar);
+    z-index: 10;
+    transition: all 0.3s ease;
+  }
+  
+  .avatar-wrapper:hover {
+    transform: translateY(-50%) scale(1.05) rotate(2deg);
+  }
+
+  .avatar-flat-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3B0764 0%, #6B21A8 50%, #A855F7 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .avatar-initials {
+    font-family: var(--font-headers);
+    font-size: 3.75rem; /* Enlarged initials to look perfectly balanced in 195px avatar */
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: -1px;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .avatar-shine {
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(30deg);
+    animation: shine 4s infinite linear;
+  }
+
+  @keyframes shine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  /* Universal Speech Bubble Styles */
+  .speech-bubble {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.4rem; /* Slightly larger padding for premium feel */
+    border-radius: var(--border-radius-full);
+    box-shadow: var(--shadow-bubble);
+    z-index: 20;
+    user-select: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .speech-bubble:hover {
+    transform: scale(1.05) translateY(-3px) !important;
+    box-shadow: 0 25px 30px -5px rgba(109, 40, 217, 0.12), 0 12px 15px -6px rgba(109, 40, 217, 0.12);
+  }
+
+  .bubble-text {
+    font-family: var(--font-headers);
+    font-size: 0.95rem; /* Marginally larger text */
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .bold-text {
+    font-weight: 700;
+    font-size: 1.2rem; /* Marginally larger bold text */
+    color: var(--text-main);
+  }
+
+  .purple-text {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  /* Bubble 1: Disponible para trabajar (Top Right of Avatar) */
+  .bubble-green {
+    background: var(--green-bg);
+    border: 1px solid rgba(134, 239, 172, 0.3);
+    color: var(--green-text);
+    top: 25px;
+    left: 170px; /* Floating elegantly above and to the right of the larger avatar */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Bubble 2: 👋 Hola, soy Rogelio (Middle Right of Avatar) */
+  .bubble-white {
+    background: var(--white-bg);
+    border: 1px solid rgba(109, 40, 217, 0.05);
+    padding: 1rem 1.6rem; /* Scaled up padding */
+    top: 131px; /* Perfectly centered vertically with the 195px avatar */
+    left: 245px; /* Positioned to the right of the larger avatar */
+  }
+
+  .hand-wave {
+    display: inline-block;
+    animation: wave 2.5s infinite;
+    transform-origin: 70% 70%;
+  }
+
+  @keyframes wave {
+    0% { transform: rotate( 0.0deg) }
+    10% { transform: rotate(14.0deg) }
+    20% { transform: rotate(-8.0deg) }
+    30% { transform: rotate(14.0deg) }
+    40% { transform: rotate(-4.0deg) }
+    50% { transform: rotate(10.0deg) }
+    60% { transform: rotate( 0.0deg) }
+    100% { transform: rotate( 0.0deg) }
+  }
+
+  /* Bubble 3: Desarrollador Web (Bottom of Avatar) */
+  .bubble-purple {
+    background: var(--white-bg);
+    border: 1px solid rgba(109, 40, 217, 0.05);
+    left: 130px; /* Clean overlay position overlapping the bottom-right of the avatar */
+    bottom: 25px;
+  }
+
+  /* Speech Bubble Tails */
+  .bubble-tail {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+  }
+
+  /* Green bubble pointer (bottom-left pointing towards avatar) */
+  .tail-bottom-left {
+    bottom: -8px;
+    left: 20px;
+    border-width: 8px 8px 0 0;
+    border-color: rgba(220, 252, 231, 0.9) transparent transparent transparent;
+  }
+
+  /* White bubble pointer (left pointing to avatar) */
+  .tail-left {
+    left: -9px;
+    top: calc(50% - 6px);
+    border-width: 6px 10px 6px 0;
+    border-color: transparent var(--white-bg) transparent transparent;
+  }
+
+  /* Purple bubble pointer (top-left pointing to avatar) */
+  .tail-top-left {
+    top: -8px;
+    left: 25px;
+    border-width: 0 8px 8px 0;
+    border-color: transparent transparent var(--white-bg) transparent;
+  }
+
+  /* Biography text styling */
+  .intro-content {
+    margin-top: 1.5rem; /* Marginally increased spacing */
+    margin-bottom: 2.5rem;
+    text-align: left;
+    width: 100%;
+  }
+
+  .profile-paragraph {
+    font-size: 1.15rem; /* Scaled up from 1.05rem for bold premium presentation */
+    color: var(--text-main);
+    line-height: 1.8; /* Increased line-height for absolute readability */
+    margin-bottom: 1.5rem;
+  }
+
+  .profile-paragraph strong {
+    color: var(--primary-light);
+    font-weight: 600;
+  }
+
+  /* Actions CTA buttons styling */
+  .cta-actions {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 1.5rem; /* Scaled gap */
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 0.95rem 1.9rem; /* Scaled up button padding */
+    border-radius: var(--border-radius-full);
+    font-family: var(--font-headers);
+    font-size: 1.05rem; /* Scaled up button text size */
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+
+  .btn-outline {
+    background-color: var(--white-bg);
+    border: 1.5px solid var(--primary-light);
+    color: var(--primary-light);
+    box-shadow: 0 4px 10px rgba(109, 40, 217, 0.05);
+  }
+
+  .btn-outline:hover {
+    background-color: var(--primary-light);
+    color: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.2);
+  }
+
+  .btn-icon {
+    width: 20px; /* Marginally larger icons */
+    height: 20px;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 500px) {
+    .avatar-interactive-wrapper {
+      height: 270px; /* Scaled up from 230px */
+      max-width: 375px; /* Wider content area for mobile */
+      margin-bottom: 2rem;
+    }
+
+    .avatar-wrapper {
+      width: 140px; /* Larger vertically centered avatar on mobile (was 120px) */
+      height: 140px;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .avatar-wrapper:hover {
+      transform: translateY(-50%) scale(1.05) rotate(2deg);
+    }
+
+    .avatar-initials {
+      font-size: 2.75rem; /* Larger initials on mobile */
+    }
+
+    .bubble-green {
+      left: 120px;
+      top: 15px;
+      padding: 0.55rem 1.05rem;
+    }
+    
+    .bubble-green .bubble-text {
+      font-size: 0.85rem;
+    }
+
+    .bubble-white {
+      left: 175px; /* Adjusted left position on mobile to prevent overflow */
+      top: 115px; /* Perfectly centered vertically with the 140px avatar on mobile */
+      padding: 0.55rem 1.05rem; /* Slightly reduced padding to save space */
+    }
+
+    .bold-text {
+      font-size: 0.95rem; /* Marginally larger text size to fit viewport comfortably */
+    }
+
+    .bubble-purple {
+      left: 95px;
+      bottom: 20px;
+      padding: 0.55rem 1.05rem;
+    }
+    
+    .bubble-purple .bubble-text {
+      font-size: 0.85rem;
+    }
+
+    .profile-paragraph {
+      font-size: 1.1rem; /* Slightly larger paragraph on mobile */
+    }
+
+    .cta-actions {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 0.95rem 1.9rem;
+    }
+  }
+</style>

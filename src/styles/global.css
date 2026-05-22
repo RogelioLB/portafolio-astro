@@ -1,0 +1,154 @@
+/* Reset & Base Styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Color Palette (Sleek light lavender/purple theme) */
+  --bg-gradient-start: #F3EAFF; /* Light pastel lavender */
+  --bg-gradient-end: #FFFFFF;
+  --text-main: #1F2937; /* Dark slate gray */
+  --text-muted: #4B5563; /* Medium gray */
+  --primary: #6D28D9; /* Deep violet */
+  --primary-light: #7C3AED;
+  --primary-glow: rgba(124, 58, 237, 0.15);
+  --green-bg: rgba(220, 252, 231, 0.9);
+  --green-text: #15803D;
+  --green-dot: #22C55E;
+  --white-bg: #FFFFFF;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(243, 234, 255, 0.6);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-bubble: 0 20px 25px -5px rgba(109, 40, 217, 0.08), 0 8px 10px -6px rgba(109, 40, 217, 0.08);
+  --shadow-avatar: 0 25px 50px -12px rgba(109, 40, 217, 0.15);
+  --border-radius-sm: 8px;
+  --border-radius-md: 16px;
+  --border-radius-lg: 24px;
+  --border-radius-full: 9999px;
+
+  /* Typography */
+  --font-headers: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Layout */
+  --max-width: 768px; /* Compact & modern layout similar to the mobile/tablet mockup */
+}
+
+/* Base Configuration */
+html {
+  font-family: var(--font-body);
+  color: var(--text-main);
+  background-color: var(--bg-gradient-end);
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 1000px, var(--bg-gradient-end) 100%);
+  background-attachment: scroll;
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headers);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+}
+
+/* Micro-animations and Utilities */
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--border-radius-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+/* Custom Floating Animations with different speeds and heights */
+@keyframes floatSlow {
+  0% { transform: translateY(0px) rotate(0.5deg); }
+  50% { transform: translateY(-8px) rotate(-0.5deg); }
+  100% { transform: translateY(0px) rotate(0.5deg); }
+}
+
+@keyframes floatMedium {
+  0% { transform: translateY(0px) rotate(-1deg); }
+  50% { transform: translateY(-12px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(-1deg); }
+}
+
+@keyframes floatFast {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-16px) rotate(-1.5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.float-medium {
+  animation: floatMedium 4.5s ease-in-out infinite;
+}
+
+.float-fast {
+  animation: floatFast 3.5s ease-in-out infinite;
+}
+
+/* Green dot pulse indicator */
+@keyframes pulseDot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+.pulse-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: var(--green-dot);
+  border-radius: 50%;
+  animation: pulseDot 2s infinite;
+}
+
+/* Modern Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(109, 40, 217, 0.15);
+  border-radius: var(--border-radius-full);
+  border: 2px solid transparent;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(109, 40, 217, 0.35);
+}
