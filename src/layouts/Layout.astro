@@ -8,7 +8,7 @@ interface Props {
 
 const { 
 	title = "Rogelio López | Ingeniero de Software Full-Stack", 
-	description = "Portafolio profesional de Rogelio López, Ingeniero de Software especializado en desarrollo full-stack, SaaS, pasarelas de pago y automatizaciones con WhatsApp Business API." 
+	description = "Portafolio profesional de Rogelio López, Ingeniero de Software especializado en desarrollo full-stack, SaaS, integraciones de pago con Mercado Pago y automatizaciones con WhatsApp Business API." 
 } = Astro.props;
 ---
 
@@ -17,31 +17,72 @@ const {
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
+		
+		<!-- Favicon de Alta Resolución Generado -->
+		<link rel="icon" type="image/png" href="/favicon.png" />
 		<meta name="generator" content={Astro.generator} />
 		
-		<!-- SEO Meta Tags -->
+		<!-- SEO Meta Tags Avanzados -->
 		<title>{title}</title>
 		<meta name="description" content={description} />
 		<meta name="author" content="Rogelio López" />
-		<meta name="keywords" content="Rogelio Lopez, RogelioLB, Ingeniero de Software, Full-Stack, Next.js, React Native, C#, Node.js, Portafolio, DentaFlow, Nexo Laboral" />
+		<meta name="robots" content="index, follow" />
+		<meta name="keywords" content="Rogelio Lopez, RogelioLB, Ingeniero de Software, Full-Stack Developer, C#, Node.js, Next.js, React, Supabase, Docker, WhatsApp API, Mercado Pago, Sinaloa, programador remoto" />
+		<link rel="canonical" href="https://rogeliolb.dev" />
 		
-		<!-- Open Graph / Facebook -->
+		<!-- Open Graph / Facebook / LinkedIn Previews -->
 		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://rogeliolb.dev" />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
+		<meta property="og:image" content="https://rogeliolb.dev/avatar.png" />
 		<meta property="og:site_name" content="Rogelio López" />
 
-		<!-- Twitter -->
+		<!-- Twitter / X -->
 		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content="https://rogeliolb.dev" />
 		<meta property="twitter:title" content={title} />
 		<meta property="twitter:description" content={description} />
+		<meta property="twitter:image" content="https://rogeliolb.dev/avatar.png" />
 
 		<!-- Google Fonts -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+		<!-- Marcado de Datos Estructurados JSON-LD (Excelente para indexación en Google) -->
+		<script type="application/ld+json" is:inline>
+			{
+				"@context": "https://schema.org",
+				"@type": "Person",
+				"name": "Rogelio López",
+				"jobTitle": "Ingeniero de Software Full-Stack",
+				"url": "https://rogeliolb.dev",
+				"image": "https://rogeliolb.dev/avatar.png",
+				"sameAs": [
+					"https://github.com/RogelioLB",
+					"https://linkedin.com/in/rogeliolb"
+				],
+				"knowsAbout": [
+					"Software Engineering",
+					"Web Development",
+					"Full-Stack Development",
+					"JavaScript",
+					"TypeScript",
+					"Node.js",
+					"React",
+					"Next.js",
+					"React Native",
+					"C#",
+					"SQL Server",
+					"PostgreSQL",
+					"Docker",
+					"Traefik",
+					"Mercado Pago",
+					"WhatsApp Business API"
+				]
+			}
+		</script>
 	</head>
 	<body>
 		<slot />
