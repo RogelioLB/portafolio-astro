@@ -131,17 +131,17 @@ export const projects: Project[] = [
       en: 'Migrating a full e-commerce catalog from Shopify to a self-hosted platform without losing products, variants, or images in the process.',
     },
     summary: {
-      es: 'Migración completa de la tienda e-commerce de la plataforma Shopify a MedusaJS para un cliente importante en México.',
-      en: 'A complete migration of an e-commerce store from Shopify to MedusaJS for a major client in Mexico.',
+      es: 'Migración completa de una tienda Shopify en México a MedusaJS para un cliente importante del sector de ferretería y herrajes.',
+      en: 'A complete migration of a Shopify store in Mexico to MedusaJS for a major hardware and fittings retailer.',
     },
     detail: {
-      es: 'Desarrollo a medida de scripts en Node.js para la migración íntegra de productos, variantes e imágenes a un almacenamiento S3 con MinIO, validando cada lote antes de aplicarlo en producción para evitar pérdida de datos.',
-      en: 'Custom Node.js scripts handled the full migration of products, variants, and images into S3 storage via MinIO, validating every batch before applying it to production to prevent data loss.',
+      es: 'Desarrollo a medida de scripts en Node.js para la migración íntegra de productos, variantes e imágenes a un almacenamiento S3 con MinIO, validando cada lote antes de aplicarlo en producción para evitar pérdida de datos. Si tienes una tienda Shopify en México y buscas migrar a otra plataforma sin perder tu catálogo, este es exactamente el tipo de proyecto que hago.',
+      en: 'Custom Node.js scripts handled the full migration of products, variants, and images into S3 storage via MinIO, validating every batch before applying it to production to prevent data loss. If you run a Shopify store and are looking to migrate to another platform without losing your catalog, this is exactly the kind of project I take on.',
     },
     tech: ['MedusaJS', 'Next.js', 'MinIO (S3)', 'PostgreSQL'],
     keywords: {
-      es: ['migración de Shopify a MedusaJS', 'migración de e-commerce', 'MinIO S3 Node.js'],
-      en: ['Shopify to MedusaJS migration', 'e-commerce migration', 'MinIO S3 Node.js'],
+      es: ['migración de Shopify a MedusaJS', 'shopify méxico', 'migración de e-commerce', 'MinIO S3 Node.js'],
+      en: ['Shopify to MedusaJS migration', 'ecommerce migration service', 'MinIO S3 Node.js'],
     },
   },
   {

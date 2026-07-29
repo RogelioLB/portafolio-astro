@@ -8,6 +8,7 @@ export const defaultLang = 'es';
 export const ui = {
   es: {
     'nav.about': 'Sobre mí',
+    'nav.services': 'Servicios',
     'nav.projects': 'Proyectos',
     'nav.experience': 'Experiencia',
     'nav.contact': 'Contáctame',
@@ -21,6 +22,16 @@ export const ui = {
     'hero.cta.contact': 'Contáctame',
     'hero.cta.projects': 'Ver proyectos',
     'hero.code.location': 'Sinaloa, MX (remoto)',
+
+    'services.eyebrow': 'Servicios',
+    'services.title': 'En qué puedo ayudarte',
+    'services.fullstack.title': 'Desarrollo Full-Stack',
+    'services.fullstack.body': 'Contrata un desarrollador full-stack para construir tu SaaS, dashboard o herramienta interna de principio a fin — desde la base de datos hasta la interfaz.',
+    'services.whatsapp.title': 'Integración de WhatsApp Business API',
+    'services.whatsapp.body': 'Automatiza soporte, ventas y notificaciones conectando tu negocio a la API de WhatsApp Business, con chatbots o flujos personalizados.',
+    'services.migration.title': 'Migración de Shopify y E-commerce',
+    'services.migration.body': 'Migra tu tienda de Shopify a la plataforma que necesites (como MedusaJS) sin perder productos, variantes ni historial — ya lo hice para una tienda en México.',
+    'services.cta': 'Hablemos de tu proyecto',
 
     'about.eyebrow': 'Perfil',
     'about.title': 'Sobre mí',
@@ -65,6 +76,7 @@ export const ui = {
   },
   en: {
     'nav.about': 'About',
+    'nav.services': 'Services',
     'nav.projects': 'Projects',
     'nav.experience': 'Experience',
     'nav.contact': 'Contact me',
@@ -78,6 +90,16 @@ export const ui = {
     'hero.cta.contact': 'Contact me',
     'hero.cta.projects': 'View projects',
     'hero.code.location': 'Sinaloa, MX (remote)',
+
+    'services.eyebrow': 'Services',
+    'services.title': 'How I can help',
+    'services.fullstack.title': 'Full-Stack Development',
+    'services.fullstack.body': 'Hire a full-stack developer to build your SaaS, dashboard, or internal tool end to end — from the database to the interface.',
+    'services.whatsapp.title': 'WhatsApp Business API Integration',
+    'services.whatsapp.body': 'Automate support, sales, and notifications by connecting your business to the WhatsApp Business API, with custom chatbots or flows.',
+    'services.migration.title': 'Shopify & E-commerce Migration',
+    'services.migration.body': "Migrate your Shopify store to the platform you need (like MedusaJS) without losing products, variants, or history — already done for a store in Mexico.",
+    'services.cta': "Let's talk about your project",
 
     'about.eyebrow': 'Profile',
     'about.title': 'About me',
@@ -102,7 +124,7 @@ export const ui = {
 
     'contact.eyebrow': 'Contact',
     'contact.title': "Let's talk",
-    'contact.heading': 'Have a project in mind?',
+    'contact.heading': 'Hire a full-stack developer for your next project',
     'contact.body': "I'm available for full-time roles, freelance projects, or technical consulting. Send me a message and let's talk about how I can add value to your team.",
     'contact.linkedin': 'LinkedIn',
     'contact.location': 'Location',

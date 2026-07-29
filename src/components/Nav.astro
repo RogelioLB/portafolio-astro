@@ -16,6 +16,7 @@ const linksGroup = lang === 'en' ? 'Links' : 'Enlaces';
 
 const commands = [
   { group: sectionsGroup, label: t('nav.about'), href: `${home}#sobre-mi` },
+  { group: sectionsGroup, label: t('nav.services'), href: `${home}#servicios` },
   { group: sectionsGroup, label: t('nav.experience'), href: `${home}#experiencia` },
   { group: sectionsGroup, label: t('nav.projects'), href: `${home}#proyectos` },
   { group: sectionsGroup, label: t('nav.contact'), href: `${home}#contacto` },
@@ -33,6 +34,7 @@ const otherLangHref = altPath ?? (lang === 'en' ? '/' : '/en');
 
     <div class="nav-links">
       <a href={`${home}#sobre-mi`}>{t('nav.about')}</a>
+      <a href={`${home}#servicios`}>{t('nav.services')}</a>
       <a href={`${home}#proyectos`}>{t('nav.projects')}</a>
       <a href={`${home}#experiencia`}>{t('nav.experience')}</a>
     </div>
