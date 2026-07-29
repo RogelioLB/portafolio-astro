@@ -1,0 +1,224 @@
+---
+// ProjectDetail.astro — case-study page for a single project.
+// H1 frames the specific problem the project solves (SEO keyword target), not just the project name.
+import { Image } from 'astro:assets';
+import type { Project } from '../data/projects';
+import { useTranslations, homePath, type Lang } from '../i18n/utils';
+
+interface Props {
+  project: Project;
+  lang?: Lang;
+}
+const { project, lang = 'es' } = Astro.props;
+const t = useTranslations(lang);
+
+const allImages = import.meta.glob('../assets/projects/*/*.{png,jpg,webp}', { eager: true });
+const images = Object.entries(allImages)
+  .filter(([path]) => path.includes(`/projects/${project.slug}/`))
+  .sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true }))
+  .map(([path, mod]: [string, any]) => mod.default);
+---
+
+<section class="detail">
+  <a href={`${homePath(lang)}#proyectos`} class="back-link reveal">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+    {t('projects.back')}
+  </a>
+
+  <header class="detail-head reveal">
+    <span class="mono-label project-tag">{project.tag[lang]}</span>
+    <h1>{project.problem[lang]}</h1>
+    <p class="role">{project.role[lang]}</p>
+  </header>
+
+  {images.length > 0 && (
+    <div class="hero-image reveal">
+      <Image src={images[0]} alt={project.name} widths={[480, 768, 1024]} sizes="(max-width: 840px) 100vw, 840px" quality={80} loading="eager" fetchpriority="high" class="hero-image-img" />
+    </div>
+  )}
+
+  <div class="detail-grid">
+    <div class="detail-body reveal">
+      <h2 class="section-label">{t('projects.problem.label')}</h2>
+      <p>{project.problem[lang]}</p>
+
+      <h2 class="section-label">{project.name}</h2>
+      <p>{project.summary[lang]}</p>
+      <p>{project.detail[lang]}</p>
+
+      {images.length > 1 && (
+        <div class="gallery">
+          {images.slice(1).map((img, i) => (
+            <Image src={img} alt={`${project.name} — ${i + 2}`} widths={[320, 480, 640]} sizes="(max-width: 600px) 50vw, 380px" quality={75} loading="lazy" class="gallery-img" />
+          ))}
+        </div>
+      )}
+    </div>
+
+    <aside class="detail-side reveal">
+      <div class="side-block">
+        <h3 class="section-label">{t('projects.stack.label')}</h3>
+        <div class="tech-tags">
+          {project.tech.map((tc) => <span>{tc}</span>)}
+        </div>
+      </div>
+
+      {project.link && (
+        <div class="side-block">
+          <a href={project.link} target="_blank" rel="noopener noreferrer" class="btn btn-outline side-link">
+            {project.linkType === 'live' ? t('projects.visit') : t('projects.repo')}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+          </a>
+        </div>
+      )}
+
+      <div class="side-block">
+        <a href={`${homePath(lang)}#contacto`} class="btn btn-primary side-link">{t('hero.cta.contact')}</a>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .detail {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) var(--space-3xl);
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-sm);
+    color: var(--color-ink-muted);
+    margin-bottom: var(--space-xl);
+    transition: color var(--dur-short) var(--ease-out);
+  }
+
+  .back-link:hover {
+    color: var(--color-accent);
+  }
+
+  .detail-head {
+    margin-bottom: var(--space-xl);
+  }
+
+  .project-tag {
+    color: var(--color-accent);
+  }
+
+  .detail-head h1 {
+    font-size: var(--text-display-s);
+    max-width: 26ch;
+    margin: var(--space-sm) 0 var(--space-md);
+  }
+
+  .role {
+    font-size: var(--text-sm);
+    color: var(--color-ink-muted);
+  }
+
+  .hero-image {
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    margin-bottom: var(--space-2xl);
+  }
+
+  .hero-image-img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 7fr 3fr;
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-ink-muted);
+    margin-bottom: var(--space-sm);
+  }
+
+  .detail-body h2.section-label {
+    margin-top: var(--space-xl);
+  }
+
+  .detail-body h2.section-label:first-child {
+    margin-top: 0;
+  }
+
+  .detail-body p {
+    font-size: var(--text-md);
+    color: var(--color-ink-2);
+    line-height: 1.7;
+    margin-bottom: var(--space-md);
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+  }
+
+  .gallery-img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-rule);
+  }
+
+  .detail-side {
+    position: sticky;
+    top: 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+  }
+
+  .tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .tech-tags span {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.3rem 0.55rem;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-rule);
+    color: var(--color-ink-muted);
+  }
+
+  .side-link {
+    width: 100%;
+  }
+
+  @media (max-width: 60rem) {
+    .detail-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .detail-side {
+      position: static;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .gallery {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

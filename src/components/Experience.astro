@@ -1,422 +1,256 @@
 ---
-// Experience.astro - Visual vertical timeline ("trail") of Rogelio's professional experience
+// Experience.astro — the one dark graphite band (Cobalt signature move 8).
+import { experience } from '../data/experience';
+import { useTranslations, type Lang } from '../i18n/utils';
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = 'es' } = Astro.props;
+const t = useTranslations(lang);
 ---
 
-<section class="experience-container" id="experiencia">
-  <!-- Section Title -->
-  <div class="section-title">
-    <span class="icon-brackets">&lt;/&gt;</span>
-    <h2>Trayectoria Profesional</h2>
-  </div>
-
-  <div class="trail-wrapper">
-    <!-- Vertical Trail Line -->
-    <div class="trail-line"></div>
-
-    <!-- Timeline Node 1: Freelance Developer (Present) -->
-    <div class="trail-node">
-      <div class="node-dot dot-active">
-        <div class="dot-pulse"></div>
-      </div>
-      <div class="node-content glass-card">
-        <div class="node-header">
-          <div class="role-company">
-            <h3>Freelance Full-Stack Developer</h3>
-            <span class="company">Clientes en México & Chile</span>
-          </div>
-          <span class="node-date present-tag">2023 – Presente</span>
-        </div>
-        <p class="role-intro">
-          Consultoría y desarrollo de punta a punta, implementando integraciones complejas de backend, inteligencia artificial, pasarelas de pago y despliegues optimizados en servidores VPS.
-        </p>
-
-        <!-- Sub-projects of Freelance in a compact list -->
-        <div class="sub-projects">
-          <h4>Proyectos Freelance Destacados:</h4>
-          
-          <!-- ProtolyLat -->
-          <div class="sub-project-item">
-            <div class="sub-proj-dot"></div>
-            <div class="sub-proj-details">
-              <h5>AI Chatbot e-commerce · <span>ProtolyLat</span></h5>
-              <p>Plataforma de chat con LLM conectada a Shopify. Integra búsqueda semántica de productos por título/descripción y carrito de compras externo sincronizado vía API.</p>
-              <div class="sub-proj-tech">
-                <span class="mini-badge">NextJS</span>
-                <span class="mini-badge">TypeScript</span>
-                <span class="mini-badge">PostgreSQL</span>
-                <span class="mini-badge">Redis</span>
-                <span class="mini-badge">Docker</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Alfri Chapas -->
-          <div class="sub-project-item">
-            <div class="sub-proj-dot"></div>
-            <div class="sub-proj-details">
-              <h5>Sync Shopify & Mercado Libre · <span>Alfri Chapas</span></h5>
-              <p>Desarrollo de un sistema sincrónico para publicar y sincronizar productos de Shopify en Mercado Libre con un solo botón, utilizando inteligencia artificial para autorrellenar especificaciones.</p>
-              <div class="sub-proj-tech">
-                <span class="mini-badge">C#</span>
-                <span class="mini-badge">ASP.NET MVC</span>
-                <span class="mini-badge">PostgreSQL</span>
-                <span class="mini-badge">Redis</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- VictorManeTattoo -->
-          <div class="sub-project-item">
-            <div class="sub-proj-dot"></div>
-            <div class="sub-proj-details">
-              <h5>Chat Widget con IA · <span>VictorManeTattoo (NYC)</span></h5>
-              <p>Widget de chat inteligente integrado en landing page para agendar citas, responder dudas frecuentes de clientes y portafolio interactivo basado en agente IA de Python.</p>
-              <div class="sub-proj-tech">
-                <span class="mini-badge">Vite</span>
-                <span class="mini-badge">React</span>
-                <span class="mini-badge">Python</span>
-                <span class="mini-badge">OpenAI API</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- FinanzIA -->
-          <div class="sub-project-item text-muted-item">
-            <div class="sub-proj-dot"></div>
-            <div class="sub-proj-details">
-              <h5>FinanzIA · <span>Aplicación de Finanzas</span></h5>
-              <p>App móvil personal de gestión de gastos, suscripciones y deudas, asistida por chat de IA contextualizado. Publicación en Playstore en prueba cerrada.</p>
-              <div class="sub-proj-tech">
-                <span class="mini-badge">React Native</span>
-                <span class="mini-badge">Expo</span>
-                <span class="mini-badge">ExpressJS</span>
-                <span class="mini-badge">SQLite</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+<section class="experience" id="experiencia">
+  <div class="experience-inner">
+    <div class="section-head">
+      <span class="mono-label">{t('experience.eyebrow')}</span>
+      <h2>{t('experience.title')}</h2>
     </div>
 
-    <!-- Timeline Node 2: TORKE (2022-2026) -->
-    <div class="trail-node">
-      <div class="node-dot"></div>
-      <div class="node-content glass-card">
-        <div class="node-header">
-          <div class="role-company">
-            <h3>Ingeniero de Software</h3>
-            <span class="company">TORKE Trabaja Contigo</span>
+    <div class="trail">
+      {experience.map((node) => (
+        <div class="node reveal">
+          <div class="node-marker">
+            <span class={`dot ${node.active ? 'dot-active' : ''}`}></span>
           </div>
-          <span class="node-date">2022 – 2025</span>
+          <div class="node-body">
+            <div class="node-head">
+              <div>
+                <h3>{node.role[lang]}</h3>
+                <span class="company">{node.company}</span>
+              </div>
+              <span class={`date-chip ${node.active ? 'date-active' : ''}`}>{node.date[lang]}</span>
+            </div>
+            <p class="node-intro">{node.intro[lang]}</p>
+
+            {node.achievements && (
+              <ul class="achievements">
+                {node.achievements.map((a) => <li set:html={a[lang]} />)}
+              </ul>
+            )}
+
+            {node.tech && (
+              <div class="mini-badges">
+                {node.tech.map((tech) => <span>{tech}</span>)}
+              </div>
+            )}
+
+            {node.subProjects && (
+              <div class="sub-projects">
+                {node.subProjects.map((sp) => (
+                  <div class="sub-project">
+                    <h4>{sp.title[lang]} <span class="sub-client">· {sp.client}</span></h4>
+                    <p>{sp.description[lang]}</p>
+                    <div class="mini-badges">
+                      {sp.tech.map((tech) => <span>{tech}</span>)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-        <p class="role-intro">
-          Desarrollador principal encargado del soporte, mantenimiento y creación de nuevos productos enlazados al sistema general de ventas y facturación (BMS).
-        </p>
-        <ul class="achievements-list">
-          <li>
-            <strong>Optimización de Ventas:</strong> Integración de la API Ventiapp para sincronización física y digital de más de 9,000 productos en marketplaces, incrementando la velocidad de búsqueda de órdenes en un 100%.
-          </li>
-          <li>
-            <strong>SaaS de Reuniones:</strong> Creación de una plataforma web multi-tenant para minutas de reuniones y asignación de tareas con roles y permisos granularizados, eliminando las fugas de información de antiguos Excels compartidos.
-          </li>
-        </ul>
-        <div class="node-tech-badges">
-          <span class="mini-badge">C#</span>
-          <span class="mini-badge">ASP.NET</span>
-          <span class="mini-badge">SQL Server</span>
-          <span class="mini-badge">NextJS</span>
-          <span class="mini-badge">TypeScript</span>
-          <span class="mini-badge">Microservicios</span>
-        </div>
-      </div>
+      ))}
     </div>
   </div>
 </section>
 
 <style>
-  .experience-container {
+  .experience {
+    background: var(--color-graphite);
+    width: 100%;
+    margin-inline: calc(50% - 50vw);
+    padding-block: var(--space-3xl);
+    color: var(--color-ink-on-dark-muted);
+  }
+
+  .experience-inner {
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: 2rem 1.5rem 3rem 1.5rem;
+    padding-inline: var(--space-lg);
   }
 
-  /* Title styling */
-  .section-title {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 3rem;
-  }
-
-  .icon-brackets {
-    font-family: var(--font-headers);
-    color: var(--primary-light);
-    font-size: 1.6rem;
-    font-weight: 800;
-  }
-
-  .section-title h2 {
-    font-size: 1.8rem;
-    color: var(--text-main);
-    letter-spacing: -0.5px;
-  }
-
-  /* Trail / Timeline Wrapper */
-  .trail-wrapper {
-    position: relative;
+  .section-head {
     display: flex;
     flex-direction: column;
-    gap: 2.5rem;
-    padding-left: 2rem;
+    gap: var(--space-2xs);
+    margin-bottom: var(--space-xl);
   }
 
-  /* Glowing Trail line */
-  .trail-line {
-    position: absolute;
-    left: 7px;
-    top: 10px;
-    bottom: 20px;
-    width: 2px;
-    background: linear-gradient(
-      180deg,
-      var(--primary-light) 0%,
-      rgba(124, 58, 237, 0.3) 70%,
-      rgba(124, 58, 237, 0.05) 100%
-    );
-    border-radius: var(--border-radius-full);
-    box-shadow: 0 0 10px rgba(124, 58, 237, 0.2);
+  .experience .mono-label {
+    color: var(--color-accent);
   }
 
-  .trail-node {
-    position: relative;
-    width: 100%;
+  .experience h2 {
+    color: var(--color-ink-on-dark);
+    font-size: var(--text-2xl);
   }
 
-  /* Timeline dots */
-  .node-dot {
-    position: absolute;
-    left: calc(-2rem - 3px);
-    top: 24px;
-    width: 16px;
-    height: 16px;
+  .trail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+  }
+
+  .node {
+    display: grid;
+    grid-template-columns: 1.5rem 1fr;
+    gap: var(--space-md);
+  }
+
+  .node-marker {
+    display: flex;
+    justify-content: center;
+    padding-top: var(--space-3xs);
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background-color: #FFFFFF;
-    border: 3px solid var(--primary-light);
-    box-shadow: 0 0 8px rgba(124, 58, 237, 0.25);
-    z-index: 5;
-    transition: all 0.3s ease;
+    background: var(--color-graphite-2);
+    border: 2px solid var(--color-rule-2);
   }
 
-  .node-dot.dot-active {
-    border-color: var(--green-dot);
-    background-color: var(--green-dot);
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
+  .dot-active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
   }
 
-  .dot-pulse {
-    position: absolute;
-    top: -3px;
-    left: -3px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    border: 2.5px solid var(--green-dot);
-    animation: nodePulse 2s infinite;
+  .node-body {
+    border: 1px solid var(--color-rule-2);
+    border-radius: var(--radius-card);
+    padding: var(--space-lg);
   }
 
-  @keyframes nodePulse {
-    0% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(2.2); opacity: 0; }
-  }
-
-  .trail-node:hover .node-dot:not(.dot-active) {
-    transform: scale(1.2);
-    background-color: var(--primary-light);
-    box-shadow: 0 0 12px rgba(124, 58, 237, 0.5);
-  }
-
-  /* Card content */
-  .node-content {
-    padding: 1.75rem;
-    position: relative;
-  }
-
-  .node-header {
+  .node-head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
   }
 
-  .role-company h3 {
-    font-size: 1.2rem;
-    color: var(--text-main);
-    line-height: 1.2;
+  .node-head h3 {
+    color: var(--color-ink-on-dark);
+    font-size: var(--text-md);
   }
 
-  .role-company .company {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--primary-light);
+  .company {
+    font-size: var(--text-sm);
+    color: var(--color-accent);
   }
 
-  .node-date {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    background-color: var(--card-border);
-    padding: 0.25rem 0.6rem;
-    border-radius: var(--border-radius-sm);
+  .date-chip {
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-rule-2);
+    color: var(--color-ink-on-dark-muted);
     white-space: nowrap;
   }
 
-  .node-date.present-tag {
-    background-color: rgba(34, 197, 94, 0.1);
-    color: var(--green-text);
-    border: 1px solid rgba(34, 197, 94, 0.2);
+  .date-active {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
   }
 
-  .role-intro {
-    font-size: 0.95rem;
-    color: var(--text-muted);
+  .node-intro {
+    font-size: var(--text-sm);
     line-height: 1.6;
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--space-lg);
   }
 
-  /* Achievements list */
-  .achievements-list {
-    margin-bottom: 1.5rem;
+  .achievements {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
   }
 
-  .achievements-list li {
-    font-size: 0.9rem;
-    color: var(--text-muted);
+  .achievements li {
+    font-size: var(--text-sm);
+    line-height: 1.55;
+    padding-left: var(--space-md);
     position: relative;
-    padding-left: 1.25rem;
-    line-height: 1.5;
   }
 
-  .achievements-list li::before {
+  .achievements li::before {
     content: "→";
     position: absolute;
     left: 0;
-    color: var(--primary-light);
-    font-weight: 700;
+    color: var(--color-accent);
   }
 
-  /* Technology badges on cards */
-  .node-tech-badges {
+  .achievements :global(strong) {
+    color: var(--color-ink-on-dark);
+    font-weight: 600;
+  }
+
+  .mini-badges {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    border-top: 1px solid var(--card-border);
-    padding-top: 1rem;
+    gap: var(--space-xs);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-rule-2);
   }
 
-  .mini-badge {
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.25rem 0.6rem;
-    border-radius: var(--border-radius-sm);
-    background-color: var(--white-bg);
-    border: 1px solid var(--card-border);
-    color: var(--text-muted);
+  .mini-badges span {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-rule-2);
+    color: var(--color-ink-on-dark-muted);
   }
 
-  /* Sub-projects inside Freelance card */
   .sub-projects {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
-    border-top: 1px dashed rgba(109, 40, 217, 0.15);
-    padding-top: 1.5rem;
+    gap: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--color-rule-2);
   }
 
-  .sub-projects h4 {
-    font-size: 0.95rem;
-    color: var(--text-main);
-    margin-bottom: 0.25rem;
-  }
-
-  .sub-project-item {
-    display: flex;
-    gap: 0.75rem;
-    position: relative;
-  }
-
-  .sub-proj-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: var(--primary-light);
-    margin-top: 7px;
-    flex-shrink: 0;
-  }
-
-  .sub-proj-details h5 {
-    font-size: 0.9rem;
-    color: var(--text-main);
-    margin-bottom: 0.15rem;
-  }
-
-  .sub-proj-details h5 span {
-    color: var(--primary-light);
+  .sub-project h4 {
+    font-size: var(--text-sm);
+    color: var(--color-ink-on-dark);
+    margin-bottom: var(--space-2xs);
     font-weight: 500;
   }
 
-  .sub-proj-details p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-    margin-bottom: 0.5rem;
+  .sub-client {
+    color: var(--color-accent);
+    font-weight: 400;
   }
 
-  .sub-proj-tech {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
+  .sub-project p {
+    font-size: var(--text-xs);
+    line-height: 1.55;
+    margin-bottom: var(--space-sm);
   }
 
-  .sub-proj-tech .mini-badge {
-    padding: 0.15rem 0.4rem;
-    font-size: 0.7rem;
-    border-radius: 4px;
+  .sub-project .mini-badges {
+    border-top: none;
+    padding-top: 0;
   }
 
-  /* Responsiveness */
-  @media (max-width: 600px) {
-    .trail-wrapper {
-      padding-left: 1.25rem;
-    }
-
-    .trail-line {
-      left: 3px;
-    }
-
-    .node-dot {
-      left: calc(-1.25rem - 5px);
-      width: 12px;
-      height: 12px;
-      top: 24px;
-    }
-
-    .dot-pulse {
-      width: 12px;
-      height: 12px;
-    }
-
-    .node-header {
+  @media (max-width: 40rem) {
+    .node-head {
       flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
-    }
-
-    .node-content {
-      padding: 1.25rem;
+      gap: var(--space-2xs);
     }
   }
 </style>

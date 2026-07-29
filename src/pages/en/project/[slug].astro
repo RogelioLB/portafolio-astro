@@ -1,0 +1,40 @@
+---
+// en/project/[slug].astro — English case-study page for a single project.
+import Layout from '../../../layouts/Layout.astro';
+import Nav from '../../../components/Nav.astro';
+import ProjectDetail from '../../../components/ProjectDetail.astro';
+import { projects } from '../../../data/projects';
+
+export function getStaticPaths() {
+  return projects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const lang = 'en';
+
+const title = `${project.name} — ${project.tag.en} | Rogelio López`;
+const description = project.problem.en;
+---
+
+<Layout
+  lang={lang}
+  path={`/en/project/${project.slug}`}
+  alternates={{ es: `/proyecto/${project.slug}`, en: `/en/project/${project.slug}` }}
+  title={title}
+  description={description}
+>
+  <Nav lang={lang} altPath={`/proyecto/${project.slug}`} />
+  <ProjectDetail project={project} lang={lang} />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: project.name,
+    description: project.summary.en,
+    author: { '@type': 'Person', name: 'Rogelio López', url: 'https://rogeliolb.dev' },
+    keywords: project.keywords.en.join(', '),
+    url: `https://rogeliolb.dev/en/project/${project.slug}`,
+  })} />
+</Layout>

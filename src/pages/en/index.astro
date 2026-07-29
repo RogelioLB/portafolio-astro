@@ -1,0 +1,21 @@
+---
+// en/index.astro - English homepage
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Hero from '../../components/Hero.astro';
+import AboutMe from '../../components/AboutMe.astro';
+import Experience from '../../components/Experience.astro';
+import Projects from '../../components/Projects.astro';
+import Contact from '../../components/Contact.astro';
+
+const lang = 'en';
+---
+
+<Layout lang={lang} path="/en" alternates={{ es: '/', en: '/en' }}>
+  <Nav lang={lang} />
+  <Hero lang={lang} />
+  <AboutMe lang={lang} />
+  <Experience lang={lang} />
+  <Projects lang={lang} />
+  <Contact lang={lang} />
+</Layout>

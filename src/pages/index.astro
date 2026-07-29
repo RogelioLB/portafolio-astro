@@ -1,53 +1,21 @@
 ---
-// index.astro - Assembly point for Rogelio's full-stack software portfolio
+// index.astro - Spanish (default) homepage
 import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
 import Hero from '../components/Hero.astro';
 import AboutMe from '../components/AboutMe.astro';
 import Experience from '../components/Experience.astro';
 import Projects from '../components/Projects.astro';
 import Contact from '../components/Contact.astro';
+
+const lang = 'es';
 ---
 
-<Layout>
-  <!-- Interactive Hero Top Section -->
-  <Hero />
-
-  <!-- Divider visual line -->
-  <div class="section-divider"></div>
-
-  <!-- Information & Skills Profile Section -->
-  <AboutMe />
-
-  <!-- Divider visual line -->
-  <div class="section-divider"></div>
-
-  <!-- Experience Trail (Timeline) -->
-  <Experience />
-
-  <!-- Divider visual line -->
-  <div class="section-divider"></div>
-
-  <!-- Projects Showcase Grid -->
-  <Projects />
-
-  <!-- Divider visual line -->
-  <div class="section-divider"></div>
-
-  <!-- Contact card Form & Footer -->
-  <Contact />
+<Layout lang={lang} path="/" alternates={{ es: '/', en: '/en' }}>
+  <Nav lang={lang} />
+  <Hero lang={lang} />
+  <AboutMe lang={lang} />
+  <Experience lang={lang} />
+  <Projects lang={lang} />
+  <Contact lang={lang} />
 </Layout>
-
-<style>
-  /* Visual separator between sections */
-  .section-divider {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      rgba(124, 58, 237, 0) 0%,
-      rgba(124, 58, 237, 0.1) 50%,
-      rgba(124, 58, 237, 0) 100%
-    );
-  }
-</style>

@@ -1,3 +1,9 @@
+/* Hallmark · genre: modern-minimal · macrostructure: Bento Grid · theme: Cobalt
+ * F1 Bento knobs: tiles=7, spans=irregular, accent=corner-only · enrichment: none (code-card hero, Tier A)
+ * nav: N13 Inline cmdk-pill · footer: Ft2 Inline single line
+ */
+@import "../../tokens.css";
+
 /* Reset & Base Styles */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -5,60 +11,29 @@
   padding: 0;
 }
 
-:root {
-  /* Color Palette (Sleek light lavender/purple theme) */
-  --bg-gradient-start: #F3EAFF; /* Light pastel lavender */
-  --bg-gradient-end: #FFFFFF;
-  --text-main: #1F2937; /* Dark slate gray */
-  --text-muted: #4B5563; /* Medium gray */
-  --primary: #6D28D9; /* Deep violet */
-  --primary-light: #7C3AED;
-  --primary-glow: rgba(124, 58, 237, 0.15);
-  --green-bg: rgba(220, 252, 231, 0.9);
-  --green-text: #15803D;
-  --green-dot: #22C55E;
-  --white-bg: #FFFFFF;
-  --card-bg: rgba(255, 255, 255, 0.7);
-  --card-border: rgba(243, 234, 255, 0.6);
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --shadow-bubble: 0 20px 25px -5px rgba(109, 40, 217, 0.08), 0 8px 10px -6px rgba(109, 40, 217, 0.08);
-  --shadow-avatar: 0 25px 50px -12px rgba(109, 40, 217, 0.15);
-  --border-radius-sm: 8px;
-  --border-radius-md: 16px;
-  --border-radius-lg: 24px;
-  --border-radius-full: 9999px;
-
-  /* Typography */
-  --font-headers: 'Plus Jakarta Sans', sans-serif;
-  --font-body: 'Inter', sans-serif;
-
-  /* Layout */
-  --max-width: 768px; /* Compact & modern layout similar to the mobile/tablet mockup */
+html, body {
+  overflow-x: clip;
 }
 
-/* Base Configuration */
 html {
   font-family: var(--font-body);
-  color: var(--text-main);
-  background-color: var(--bg-gradient-end);
+  color: var(--color-ink-2);
+  background-color: var(--color-paper);
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
 }
 
 body {
-  background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 1000px, var(--bg-gradient-end) 100%);
-  background-attachment: scroll;
   min-height: 100vh;
   line-height: 1.6;
-  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-headers);
-  font-weight: 700;
-  line-height: 1.25;
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
 }
 
 a {
@@ -70,71 +45,104 @@ ul {
   list-style: none;
 }
 
-/* Micro-animations and Utilities */
-.glass-card {
-  background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--card-border);
-  box-shadow: var(--shadow-md);
-  border-radius: var(--border-radius-md);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Visually hidden but accessible to screen readers & search engine crawlers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.glass-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  border-color: rgba(124, 58, 237, 0.3);
+/* Hairline surface — replaces glassmorphism throughout the site */
+.tile {
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  transition: border-color var(--dur-medium) var(--ease-out);
 }
 
-/* Custom Floating Animations with different speeds and heights */
-@keyframes floatSlow {
-  0% { transform: translateY(0px) rotate(0.5deg); }
-  50% { transform: translateY(-8px) rotate(-0.5deg); }
-  100% { transform: translateY(0px) rotate(0.5deg); }
+.tile:hover {
+  border-color: var(--color-accent);
 }
 
-@keyframes floatMedium {
-  0% { transform: translateY(0px) rotate(-1deg); }
-  50% { transform: translateY(-12px) rotate(1deg); }
-  100% { transform: translateY(0px) rotate(-1deg); }
+/* Reveal — the whole motion engine. One orchestrated entrance, then settled. */
+.reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity var(--dur-long) var(--ease-out), transform var(--dur-long) var(--ease-out);
 }
 
-@keyframes floatFast {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-16px) rotate(-1.5deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
 }
 
-.float-slow {
-  animation: floatSlow 6s ease-in-out infinite;
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; transition: none; }
 }
 
-.float-medium {
-  animation: floatMedium 4.5s ease-in-out infinite;
+/* Focus ring — always instant, never animated */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
-.float-fast {
-  animation: floatFast 3.5s ease-in-out infinite;
+/* Buttons — Cobalt voice: 6px radius, one solid signal, understated outline */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: 0.7rem 1.25rem;
+  border-radius: var(--radius-control);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out),
+              color var(--dur-short) var(--ease-out);
 }
 
-/* Green dot pulse indicator */
-@keyframes pulseDot {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  border: 1px solid var(--color-accent);
 }
 
-.pulse-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  background-color: var(--green-dot);
-  border-radius: 50%;
-  animation: pulseDot 2s infinite;
+.btn-primary:hover {
+  background: oklch(52% 0.20 256);
+  border-color: oklch(52% 0.20 256);
 }
 
-/* Modern Scrollbar */
+.btn-outline {
+  background: transparent;
+  color: var(--color-ink);
+  border: 1px solid var(--color-rule);
+}
+
+.btn-outline:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Mono label — eyebrows, meta, status */
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-muted);
+}
+
+/* Modern scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -144,11 +152,13 @@ ul {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(109, 40, 217, 0.15);
-  border-radius: var(--border-radius-full);
+  background: var(--color-rule);
+  border-radius: var(--radius-pill);
   border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(109, 40, 217, 0.35);
+  background: var(--color-ink-muted);
+  background-clip: padding-box;
 }

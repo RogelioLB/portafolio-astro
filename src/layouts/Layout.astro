@@ -1,90 +1,124 @@
 ---
 import '../styles/global.css';
+import type { Lang } from '../i18n/utils';
 
 interface Props {
 	title?: string;
 	description?: string;
+	lang?: Lang;
+	path?: string;
+	alternates?: { es: string; en: string };
 }
 
-const { 
-	title = "Rogelio López | Ingeniero de Software Full-Stack", 
-	description = "Portafolio profesional de Rogelio López, Ingeniero de Software especializado en desarrollo full-stack, SaaS, integraciones de pago con Mercado Pago y automatizaciones con WhatsApp Business API." 
+const SITE = 'https://rogeliolb.dev';
+
+const {
+	lang = 'es',
+	path = lang === 'en' ? '/en' : '/',
+	alternates = { es: '/', en: '/en' },
+	title = lang === 'en'
+		? 'Rogelio López | Full-Stack Software Engineer'
+		: 'Rogelio López | Ingeniero de Software Full-Stack',
+	description = lang === 'en'
+		? 'Portfolio of Rogelio López, a Full-Stack Software Engineer specialized in Node.js, React, payment integrations with Mercado Pago, and WhatsApp Business API automations.'
+		: 'Portafolio profesional de Rogelio López, Ingeniero de Software especializado en desarrollo full-stack, integraciones de pago con Mercado Pago y automatizaciones con WhatsApp Business API.',
 } = Astro.props;
+
+const canonicalUrl = `${SITE}${path}`;
+const jobTitle = lang === 'en' ? 'Full-Stack Software Engineer' : 'Ingeniero de Software Full-Stack';
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={lang}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		
+
 		<!-- Favicon de Alta Resolución Generado -->
 		<link rel="icon" type="image/png" href="/favicon.png" />
 		<meta name="generator" content={Astro.generator} />
-		
+
 		<!-- SEO Meta Tags Avanzados -->
 		<title>{title}</title>
 		<meta name="description" content={description} />
 		<meta name="author" content="Rogelio López" />
 		<meta name="robots" content="index, follow" />
 		<meta name="keywords" content="Rogelio Lopez, RogelioLB, Ingeniero de Software, Full-Stack Developer, C#, Node.js, Next.js, React, Supabase, Docker, WhatsApp API, Mercado Pago, Sinaloa, programador remoto" />
-		<link rel="canonical" href="https://rogeliolb.dev" />
-		
+		<link rel="canonical" href={canonicalUrl} />
+		<link rel="alternate" hreflang="es" href={`${SITE}${alternates.es}`} />
+		<link rel="alternate" hreflang="en" href={`${SITE}${alternates.en}`} />
+		<link rel="alternate" hreflang="x-default" href={`${SITE}${alternates.es}`} />
+
 		<!-- Open Graph / Facebook / LinkedIn Previews -->
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://rogeliolb.dev" />
+		<meta property="og:url" content={canonicalUrl} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:image" content="https://rogeliolb.dev/avatar.png" />
 		<meta property="og:site_name" content="Rogelio López" />
+		<meta property="og:locale" content={lang === 'en' ? 'en_US' : 'es_MX'} />
 
 		<!-- Twitter / X -->
 		<meta property="twitter:card" content="summary_large_image" />
-		<meta property="twitter:url" content="https://rogeliolb.dev" />
+		<meta property="twitter:url" content={canonicalUrl} />
 		<meta property="twitter:title" content={title} />
 		<meta property="twitter:description" content={description} />
 		<meta property="twitter:image" content="https://rogeliolb.dev/avatar.png" />
+		<meta property="twitter:site" content="@RogelioLB" />
+		<meta property="twitter:creator" content="@RogelioLB" />
 
-		<!-- Google Fonts -->
+		<!-- Google Fonts — Space Grotesk (display) + Inter (body) + JetBrains Mono (code/labels) -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
 		<!-- Marcado de Datos Estructurados JSON-LD (Excelente para indexación en Google) -->
-		<script type="application/ld+json" is:inline>
-			{
-				"@context": "https://schema.org",
-				"@type": "Person",
-				"name": "Rogelio López",
-				"jobTitle": "Ingeniero de Software Full-Stack",
-				"url": "https://rogeliolb.dev",
-				"image": "https://rogeliolb.dev/avatar.png",
-				"sameAs": [
-					"https://github.com/RogelioLB",
-					"https://linkedin.com/in/rogeliolb"
-				],
-				"knowsAbout": [
-					"Software Engineering",
-					"Web Development",
-					"Full-Stack Development",
-					"JavaScript",
-					"TypeScript",
-					"Node.js",
-					"React",
-					"Next.js",
-					"React Native",
-					"C#",
-					"SQL Server",
-					"PostgreSQL",
-					"Docker",
-					"Traefik",
-					"Mercado Pago",
-					"WhatsApp Business API"
-				]
-			}
-		</script>
+		<script type="application/ld+json" is:inline set:html={JSON.stringify({
+			"@context": "https://schema.org",
+			"@type": "Person",
+			"name": "Rogelio López",
+			"jobTitle": jobTitle,
+			"url": "https://rogeliolb.dev",
+			"image": "https://rogeliolb.dev/avatar.png",
+			"sameAs": [
+				"https://github.com/RogelioLB",
+				"https://linkedin.com/in/rogeliolb"
+			],
+			"knowsAbout": [
+				"Software Engineering",
+				"Web Development",
+				"Full-Stack Development",
+				"JavaScript",
+				"TypeScript",
+				"Node.js",
+				"React",
+				"Next.js",
+				"React Native",
+				"C#",
+				"SQL Server",
+				"PostgreSQL",
+				"Docker",
+				"Traefik",
+				"Mercado Pago",
+				"WhatsApp Business API"
+			]
+		})} />
 	</head>
 	<body>
 		<slot />
+		<script>
+			const io = new IntersectionObserver(
+				(entries) => {
+					for (const entry of entries) {
+						if (entry.isIntersecting) {
+							entry.target.classList.add('is-in');
+							io.unobserve(entry.target);
+						}
+					}
+				},
+				{ threshold: 0.12 }
+			);
+			document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+		</script>
 	</body>
 </html>
