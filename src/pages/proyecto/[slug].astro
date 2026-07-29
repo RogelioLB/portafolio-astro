@@ -15,7 +15,8 @@ export function getStaticPaths() {
 const { project } = Astro.props;
 const lang = 'es';
 
-const title = `${project.name} — ${project.tag.es} | Rogelio López`;
+const fullTitle = `${project.name} — ${project.tag.es} | Rogelio López`;
+const title = fullTitle.length > 60 ? `${project.name} — ${project.tag.es}` : fullTitle;
 const description = project.problem.es;
 ---
 
@@ -33,8 +34,8 @@ const description = project.problem.es;
     '@type': 'CreativeWork',
     name: project.name,
     description: project.summary.es,
-    author: { '@type': 'Person', name: 'Rogelio López', url: 'https://rogeliolb.dev' },
+    author: { '@type': 'Person', name: 'Rogelio López', url: 'https://www.rogeliolb.dev' },
     keywords: project.keywords.es.join(', '),
-    url: `https://rogeliolb.dev/proyecto/${project.slug}`,
+    url: `https://www.rogeliolb.dev/proyecto/${project.slug}`,
   })} />
 </Layout>

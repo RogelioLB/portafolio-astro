@@ -57,8 +57,8 @@ export const projects: Project[] = [
       en: 'An advanced labor compliance and HR system for the Chilean market, with differentiated roles for supervisors, workers, and contractors.',
     },
     detail: {
-      es: 'Cuenta con una sincronización bidireccional y robusta con la API gubernamental de Talana, lo que permite mantener los registros laborales actualizados sin doble captura de información entre sistemas.',
-      en: 'It features a robust two-way sync with the Talana government API, keeping labor records up to date without duplicate data entry between systems.',
+      es: 'Cuenta con una sincronización bidireccional y robusta con la API gubernamental de Talana, lo que permite mantener los registros laborales actualizados sin doble captura de información entre sistemas. El sistema centraliza el seguimiento del cumplimiento laboral y reemplaza el trabajo manual que antes se hacía por correo y hojas de cálculo, dando a supervisores y RRHH visibilidad en tiempo real sobre el estado de cada trabajador y contratista.',
+      en: 'It features a robust two-way sync with the Talana government API, keeping labor records up to date without duplicate data entry between systems. The platform centralizes compliance tracking and replaces the manual work previously done over email and spreadsheets, giving supervisors and HR real-time visibility into the status of every worker and contractor.',
     },
     tech: ['Next.js', 'Supabase', 'PostgreSQL', 'Talana API'],
     keywords: {
@@ -83,8 +83,8 @@ export const projects: Project[] = [
       en: 'A tool that extracts dominant color palettes from uploaded images. Supports HEX, RGB, and HSL, with automatic color-name translation to Spanish.',
     },
     detail: {
-      es: 'Todo el procesamiento ocurre en el navegador mediante Canvas API, sin subir la imagen a ningún servidor. Permite exportar la paleta final como código CSS listo para usar o como imagen PNG limpia.',
-      en: 'All processing happens in the browser via the Canvas API — no image is ever uploaded to a server. The final palette can be exported as ready-to-use CSS or a clean PNG image.',
+      es: 'Todo el procesamiento ocurre en el navegador mediante Canvas API, sin subir la imagen a ningún servidor. Permite exportar la paleta final como código CSS listo para usar o como imagen PNG limpia. Nació de una necesidad personal — sacar una paleta usable de una captura o foto sin abrir una suite de diseño completa — y terminó convirtiéndose en una pequeña herramienta open source que otros desarrolladores reutilizan.',
+      en: 'All processing happens in the browser via the Canvas API — no image is ever uploaded to a server. The final palette can be exported as ready-to-use CSS or a clean PNG image. It started as a personal need — pulling a usable palette out of a screenshot or photo without opening a full design suite — and turned into a small open-source tool that other developers now reuse.',
     },
     tech: ['Astro', 'TailwindCSS', 'TypeScript', 'Canvas API'],
     keywords: {
@@ -161,8 +161,8 @@ export const projects: Project[] = [
       en: 'A personal native mobile app for smart control of finances, debts, subscriptions, and credit cards.',
     },
     detail: {
-      es: 'Integra un chat inteligente de soporte financiero alimentado por un modelo de lenguaje (LLM) que analiza el contexto real de los gastos del usuario para responder preguntas concretas. Publicación en Play Store en prueba cerrada.',
-      en: 'It includes an AI chat assistant powered by an LLM that analyzes the user\'s real spending context to answer concrete questions. Published on the Play Store in closed testing.',
+      es: 'Integra un chat inteligente de soporte financiero alimentado por un modelo de lenguaje (LLM) que analiza el contexto real de los gastos del usuario para responder preguntas concretas. Publicación en Play Store en prueba cerrada. El objetivo fue reemplazar el hábito de anotar todo en una hoja de cálculo con algo que realmente explique los patrones de gasto y avise antes de que se renueve una suscripción, en vez de solo mostrar una lista de movimientos.',
+      en: 'It includes an AI chat assistant powered by an LLM that analyzes the user\'s real spending context to answer concrete questions. Published on the Play Store in closed testing. The goal was to replace the habit of tracking everything in a spreadsheet with something that actually explains spending patterns and flags an upcoming subscription renewal, instead of just showing a list of transactions.',
     },
     tech: ['React Native', 'Expo', 'ExpressJS', 'SQLite'],
     keywords: {

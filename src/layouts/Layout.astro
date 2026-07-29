@@ -10,7 +10,7 @@ interface Props {
 	alternates?: { es: string; en: string };
 }
 
-const SITE = 'https://rogeliolb.dev';
+const SITE = 'https://www.rogeliolb.dev';
 
 const {
 	lang = 'es',
@@ -20,8 +20,8 @@ const {
 		? 'Rogelio López | Full-Stack Software Engineer'
 		: 'Rogelio López | Ingeniero de Software Full-Stack',
 	description = lang === 'en'
-		? 'Portfolio of Rogelio López, a Full-Stack Software Engineer specialized in Node.js, React, payment integrations with Mercado Pago, and WhatsApp Business API automations.'
-		: 'Portafolio profesional de Rogelio López, Ingeniero de Software especializado en desarrollo full-stack, integraciones de pago con Mercado Pago y automatizaciones con WhatsApp Business API.',
+		? 'Portfolio of Rogelio López, Full-Stack Engineer specialized in Node.js, React, Mercado Pago payments, and WhatsApp Business API automations.'
+		: 'Portafolio de Rogelio López — Ingeniero de Software Full-Stack: Node.js, React, Mercado Pago y automatizaciones con WhatsApp Business API.',
 } = Astro.props;
 
 const canonicalUrl = `${SITE}${path}`;
@@ -54,7 +54,7 @@ const jobTitle = lang === 'en' ? 'Full-Stack Software Engineer' : 'Ingeniero de 
 		<meta property="og:url" content={canonicalUrl} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
-		<meta property="og:image" content="https://rogeliolb.dev/avatar.png" />
+		<meta property="og:image" content="https://www.rogeliolb.dev/avatar.png" />
 		<meta property="og:site_name" content="Rogelio López" />
 		<meta property="og:locale" content={lang === 'en' ? 'en_US' : 'es_MX'} />
 
@@ -63,7 +63,7 @@ const jobTitle = lang === 'en' ? 'Full-Stack Software Engineer' : 'Ingeniero de 
 		<meta property="twitter:url" content={canonicalUrl} />
 		<meta property="twitter:title" content={title} />
 		<meta property="twitter:description" content={description} />
-		<meta property="twitter:image" content="https://rogeliolb.dev/avatar.png" />
+		<meta property="twitter:image" content="https://www.rogeliolb.dev/avatar.png" />
 		<meta property="twitter:site" content="@RogelioLB" />
 		<meta property="twitter:creator" content="@RogelioLB" />
 
@@ -78,8 +78,8 @@ const jobTitle = lang === 'en' ? 'Full-Stack Software Engineer' : 'Ingeniero de 
 			"@type": "Person",
 			"name": "Rogelio López",
 			"jobTitle": jobTitle,
-			"url": "https://rogeliolb.dev",
-			"image": "https://rogeliolb.dev/avatar.png",
+			"url": "https://www.rogeliolb.dev",
+			"image": "https://www.rogeliolb.dev/avatar.png",
 			"sameAs": [
 				"https://github.com/RogelioLB",
 				"https://linkedin.com/in/rogeliolb"

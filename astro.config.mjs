@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 // https://astro.build/config
 // Usamos el adaptador oficial de Vercel para despliegues Serverless/Static híbridos en Vercel.
 export default defineConfig({
-  site: 'https://rogeliolb.dev',
+  site: 'https://www.rogeliolb.dev',
   output: 'static',
   i18n: {
     defaultLocale: 'es',
