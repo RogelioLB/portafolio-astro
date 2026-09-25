@@ -1,6 +1,6 @@
 ---
-// PixelRoom.astro — Escena pixel art 2D interactiva: Rogelio programando en su cuarto.
-// Todo se dibuja por código en un <canvas> de 320×180 (sin sprites externos) y se escala
+// PixelRoom.astro — Escena pixel art 2D interactiva, vista desde arriba: Rogelio en su cuarto.
+// Todo se dibuja por código en un <canvas> de 384×216 (sin sprites externos) y se escala
 // con image-rendering: pixelated. Los objetos clicables son <button> reales superpuestos,
 // así la escena es accesible con teclado y lectores de pantalla.
 import { projects } from '../data/projects';
@@ -100,7 +100,7 @@ const labels = {
     poster: ['Experiencia', 'Póster: experiencia profesional'],
     homelab: ['Servicios', 'Servidor: servicios'],
     phone: ['Contacto', 'Teléfono: contacto'],
-    mug: ['Café', 'Taza de café'],
+    coffee: ['Café', 'Cafetera: preparar un café'],
     lamp: ['Lámpara', 'Lámpara: encender o apagar'],
     window: ['Día / noche', 'Ventana: cambiar entre día y noche'],
     cat: ['Gato', 'Gato dormido: despertarlo'],
@@ -114,7 +114,7 @@ const labels = {
     poster: ['Experience', 'Poster: professional experience'],
     homelab: ['Services', 'Server: services'],
     phone: ['Contact', 'Phone: contact'],
-    mug: ['Coffee', 'Coffee mug'],
+    coffee: ['Coffee', 'Coffee maker: brew a cup'],
     lamp: ['Lamp', 'Lamp: toggle on or off'],
     window: ['Day / night', 'Window: toggle day and night'],
     cat: ['Cat', 'Sleeping cat: wake it up'],
@@ -122,21 +122,21 @@ const labels = {
   },
 }[lang];
 
-// Zonas clicables en coordenadas nativas del canvas (320×180). El orden importa: los
-// últimos quedan encima (el gato está sobre la ventana).
+// Zonas clicables en coordenadas nativas del canvas (384×216, vista cenital).
+// 'me' y 'cat' se mueven: el script actualiza su posición en cada cuadro.
 const hotspots: { id: keyof typeof labels; x: number; y: number; w: number; h: number; toggle?: boolean }[] = [
-  { id: 'window', x: 30, y: 20, w: 62, h: 44, toggle: true },
-  { id: 'cat', x: 32, y: 62, w: 30, h: 20 },
-  { id: 'plant', x: 2, y: 84, w: 24, h: 54 },
-  { id: 'bookshelf', x: 106, y: 44, w: 44, h: 98 },
-  { id: 'poster', x: 154, y: 20, w: 30, h: 40 },
-  { id: 'me', x: 164, y: 52, w: 44, h: 88 },
-  { id: 'monitor', x: 212, y: 54, w: 60, h: 44 },
-  { id: 'neon', x: 278, y: 20, w: 36, h: 22 },
-  { id: 'mug', x: 261, y: 89, w: 14, h: 16 },
-  { id: 'phone', x: 277, y: 85, w: 12, h: 20 },
-  { id: 'lamp', x: 290, y: 62, w: 24, h: 43, toggle: true },
-  { id: 'homelab', x: 271, y: 113, w: 34, h: 30 },
+  { id: 'window', x: 34, y: 10, w: 56, h: 42, toggle: true },
+  { id: 'plant', x: 16, y: 138, w: 30, h: 60 },
+  { id: 'bookshelf', x: 98, y: 14, w: 44, h: 52 },
+  { id: 'poster', x: 148, y: 11, w: 26, h: 33 },
+  { id: 'monitor', x: 218, y: 24, w: 60, h: 34 },
+  { id: 'phone', x: 202, y: 64, w: 13, h: 15 },
+  { id: 'lamp', x: 274, y: 31, w: 24, h: 34, toggle: true },
+  { id: 'neon', x: 318, y: 5, w: 34, h: 19 },
+  { id: 'homelab', x: 316, y: 25, w: 36, h: 39 },
+  { id: 'coffee', x: 338, y: 83, w: 30, h: 50 },
+  { id: 'cat', x: 54, y: 92, w: 20, h: 14 },
+  { id: 'me', x: 239, y: 68, w: 18, h: 24 },
 ];
 
 const pct = (v: number, total: number) => `${((v / total) * 100).toFixed(3)}%`;
@@ -167,7 +167,7 @@ const roomData = {
   <p class="sr-only">{copy.sr}</p>
   <div class="room-stage">
     <div class="room-screen">
-    <canvas class="room-canvas" width="320" height="180" aria-hidden="true"></canvas>
+    <canvas class="room-canvas" width="384" height="216" aria-hidden="true"></canvas>
     <div class="room-hotspots">
       {hotspots.map((h) => (
         <button
@@ -180,7 +180,7 @@ const roomData = {
           data-h={h.h}
           aria-label={labels[h.id][1]}
           aria-pressed={h.toggle ? 'false' : undefined}
-          style={`left:${pct(h.x, 320)};top:${pct(h.y, 180)};width:${pct(h.w, 320)};height:${pct(h.h, 180)}`}
+          style={`left:${pct(h.x, 384)};top:${pct(h.y, 216)};width:${pct(h.w, 384)};height:${pct(h.h, 216)}`}
         >
           <span class="hotspot-tip" aria-hidden="true">{labels[h.id][0]}</span>
         </button>
@@ -214,14 +214,17 @@ const roomData = {
     projects: Proj[];
   };
   type Action = { label: string; href?: string; run?: () => void };
+  type Dir = 'up' | 'down' | 'left' | 'right';
+  type Pt = [number, number];
 
   const root = document.querySelector<HTMLElement>('[data-room]');
   const dataEl = document.getElementById('room-data');
   if (root && dataEl) initRoom(root, JSON.parse(dataEl.textContent || '{}') as RoomData);
 
   function initRoom(root: HTMLElement, data: RoomData) {
-    const W = 320;
-    const H = 180;
+    // Vista cenital 3/4 (estilo RPG). Resolución nativa 384×216, escalada en múltiplos enteros.
+    const W = 384;
+    const H = 216;
     const canvas = root.querySelector<HTMLCanvasElement>('.room-canvas')!;
     const ctx = canvas.getContext('2d')!;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -229,17 +232,18 @@ const roomData = {
 
     // ---------- Paleta ----------
     const P = {
+      void: '#0c0d1c', rim: '#262a52', rimHi: '#343a6e',
       wall: '#3b3f6e', wallStripe: '#373a67', wallTop: '#2f325c', base: '#2a2c4f', baseHi: '#4a4f86',
-      floor: '#6b4630', floorLine: '#5a3a28', floorHi: '#7d5539',
+      floor: '#7a5236', floor2: '#7f573a', floorLine: '#65432d', floorHi: '#8c6142',
       wood: '#8a5a3a', woodHi: '#a56f49', woodDk: '#5e3c27', woodDk2: '#4a3020',
-      cream: '#e8e3d6', creamDk: '#c9c2b0', ink: '#15172a',
+      cream: '#e8e3d6', creamDk: '#c9c2b0', ink: '#15172a', paper: '#f4f1e8',
       cobalt: '#4a63d8', cobaltDk: '#3a4fb3', cobaltDk2: '#2a3f8f', cobaltHi: '#6d8bff',
-      skin: '#c98b62', skinDk: '#a86c4a', hair: '#1b1a24', hairHi: '#3a3850', mouth: '#8a4f35',
-      hood: '#2a2d44', hoodHi: '#383c5a', hoodDk: '#1f2236', armNear: '#343858',
-      jeans: '#2e3f6e', jeansDk: '#243259', shoe: '#e8e8f0', sole: '#b8b8c8',
+      skin: '#c98b62', skinDk: '#a86c4a', hair: '#1b1a24', hairHi: '#3a3850', mouth: '#8a4f35', frame: '#0e0e14',
+      hood: '#363b5e', hoodHi: '#4c5282', hoodDk: '#262a45', arm: '#424872',
+      jeans: '#2e3f6e', jeansDk: '#243259', shoe: '#e8e8f0',
       chair: '#1d1f2e', chairHi: '#2c2f45', metal: '#555a70',
       cat: '#e0893a', catDk: '#b86a2a', catLt: '#f4e6d0',
-      leaf1: '#2f7a43', leaf2: '#3f9a55', leaf3: '#5cbf6c', pot: '#b5623b', potHi: '#c9744a', potDk: '#9a4f2e',
+      leaf1: '#2f7a43', leaf2: '#3f9a55', leaf3: '#5cbf6c', pot: '#b5623b', potHi: '#c9744a', potDk: '#8a4a2c',
     };
     const BOOK_COLORS = ['#c94f4f', '#e0b34a', '#4f8fc9', '#5fb07a', '#9a6bc9', '#e07a4f', '#d8d8d8', '#4a63d8', '#2f8f8a'];
     const CODE_COLORS = ['#9fb4ff', '#c792ea', '#7fd4a0', '#ffcb6b', '#f78c6c', '#89ddff', '#d6d8e8'];
@@ -255,7 +259,7 @@ const roomData = {
       '4': '101101111001001', '5': '111100110001110', '6': '011100111101111', '7': '111001010010010', '8': '111101111101111',
       '9': '111101111001110', '-': '000000111000000', '.': '000000000000010', ':': '000010000010000', '/': '001001010100100',
       '>': '100010001010100', '<': '001010100010001', '!': '010010010000010', '?': '110001010000010', ' ': '000000000000000',
-      '✓': '000001001101010', '_': '000000000000111',
+      '✓': '000001001101010', '_': '000000000000111', '♥': '000101111111010',
     };
     const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
     const textW = (s: string, sc = 1) => Math.max(0, s.length * 4 * sc - sc);
@@ -281,14 +285,18 @@ const roomData = {
       ctx.fillStyle = c;
       const o = Math.floor(w / 2);
       for (let i = 0; i <= steps; i++) {
-        const x = Math.round(x0 + ((x1 - x0) * i) / steps) - o;
-        const y = Math.round(y0 + ((y1 - y0) * i) / steps) - o;
-        ctx.fillRect(x, y, w, w);
+        ctx.fillRect(Math.round(x0 + ((x1 - x0) * i) / steps) - o, Math.round(y0 + ((y1 - y0) * i) / steps) - o, w, w);
       }
     };
-    const disc = (cx: number, cy: number, r: number, c: string) => {
+    const disc = (cx: number, cy: number, r: number, c: string, sy = 1) => {
       for (let dy = -r; dy <= r; dy++) {
         const half = Math.floor(Math.sqrt(r * r - dy * dy) + 0.35);
+        R(cx - half, cy + Math.round(dy * sy), half * 2 + 1, sy < 1 ? 1 : 1, c);
+      }
+    };
+    const ellipse = (cx: number, cy: number, rx: number, ry: number, c: string) => {
+      for (let dy = -ry; dy <= ry; dy++) {
+        const half = Math.floor(rx * Math.sqrt(1 - (dy * dy) / (ry * ry)) + 0.35);
         R(cx - half, cy + dy, half * 2 + 1, 1, c);
       }
     };
@@ -300,49 +308,51 @@ const roomData = {
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
     const bubble = (x: number, y: number, w: number, h: number, tailX: number) => {
+      x = Math.max(18, Math.min(W - 18 - w, x));
       R(x + 1, y, w - 2, h, P.ink);
       R(x, y + 1, w, h - 2, P.ink);
-      R(x + 1, y + 1, w - 2, h - 2, '#f4f1e8');
-      R(tailX, y + h - 1, 3, 1, '#f4f1e8');
-      R(tailX + 1, y + h, 2, 1, P.ink);
+      R(x + 1, y + 1, w - 2, h - 2, P.paper);
+      R(tailX, y + h - 1, 3, 1, P.paper);
       R(tailX, y + h, 1, 1, P.ink);
-      R(tailX + 1, y + h - 1, 1, 1, '#f4f1e8');
+      R(tailX + 1, y + h, 2, 1, P.ink);
+      R(tailX + 1, y + h - 1, 1, 1, P.paper);
       R(tailX + 2, y + h + 1, 1, 1, P.ink);
+      return x;
+    };
+    const say = (msg: string, cx: number, top: number, color: string = P.ink) => {
+      const w = textW(msg) + 6;
+      const bx = bubble(cx - Math.floor(w / 2), top, w, 9, cx - 1);
+      text(msg, bx + 3, top + 2, color);
     };
 
     // ---------- Datos precalculados ----------
     const bookR = rng(7);
-    const shelves = [
-      { top: 49, bottom: 68 },
-      { top: 71, bottom: 90 },
-      { top: 93, bottom: 112 },
-      { top: 115, bottom: 136 },
-    ];
     type Book = { x: number; y: number; w: number; h: number; c: string };
     const books: Book[] = [];
-    shelves.forEach((s, si) => {
-      let x = 112;
-      const limit = si === 1 ? 134 : si === 3 ? 136 : 145;
+    [[23, 33], [37, 47], [51, 61]].forEach(([top, bottom], si) => {
+      let x = 103;
+      const limit = si === 0 ? 128 : 137;
       while (x < limit) {
-        const w = 2 + Math.floor(bookR() * 3);
+        const w = 2 + Math.floor(bookR() * 2);
         if (x + w > limit) break;
-        const maxH = s.bottom - s.top - 2;
-        const h = Math.max(10, maxH - Math.floor(bookR() * 6));
-        books.push({ x, y: s.bottom - h, w, h, c: BOOK_COLORS[Math.floor(bookR() * BOOK_COLORS.length)] });
-        x += w + (bookR() < 0.12 ? 1 : 0);
+        const h = Math.max(6, bottom - top - Math.floor(bookR() * 4));
+        books.push({ x, y: bottom - h, w, h, c: BOOK_COLORS[Math.floor(bookR() * BOOK_COLORS.length)] });
+        x += w + (bookR() < 0.1 ? 1 : 0);
       }
     });
-    const stars = Array.from({ length: 16 }, (_, i) => {
+    const stars = Array.from({ length: 12 }, (_, i) => {
       const r = rng(100 + i);
-      return { x: 33 + Math.floor(r() * 54), y: 25 + Math.floor(r() * 22), p: r() * 6 };
+      return { x: 40 + Math.floor(r() * 44), y: 17 + Math.floor(r() * 14), p: r() * 6 };
     });
-    const skyline = [
-      [32, 66, 8], [40, 60, 6], [46, 64, 7], [53, 57, 5], [58, 62, 9], [67, 58, 6], [73, 63, 8], [81, 60, 7],
-    ];
-    const cityLights = Array.from({ length: 14 }, (_, i) => {
+    const skyline: [number, number, number][] = [[39, 37, 7], [46, 33, 6], [52, 36, 6], [58, 31, 5], [63, 35, 8], [71, 32, 6], [77, 36, 8]];
+    const cityLights = Array.from({ length: 10 }, (_, i) => {
       const r = rng(300 + i);
       const b = skyline[Math.floor(r() * skyline.length)];
-      return { x: b[0] + 1 + Math.floor(r() * (b[2] - 2)), y: b[1] + 2 + Math.floor(r() * (74 - b[1] - 3)) };
+      return { x: b[0] + 1 + Math.floor(r() * (b[2] - 2)), y: b[1] + 2 + Math.floor(r() * (44 - b[1] - 3)) };
+    });
+    const motes = Array.from({ length: 10 }, (_, i) => {
+      const r = rng(500 + i);
+      return { u: r(), v: r(), s: 0.3 + r() * 0.7, p: r() * 6 };
     });
 
     type Tok = { w: number; c: string };
@@ -355,12 +365,29 @@ const roomData = {
         if (indent > 0 && r() < 0.25) indent--;
         const n = r() < 0.12 ? 0 : 1 + Math.floor(r() * 4);
         const toks: Tok[] = [];
-        for (let j = 0; j < n; j++) toks.push({ w: 2 + Math.floor(r() * 8), c: CODE_COLORS[Math.floor(r() * CODE_COLORS.length)] });
+        for (let j = 0; j < n; j++) toks.push({ w: 2 + Math.floor(r() * 7), c: CODE_COLORS[Math.floor(r() * CODE_COLORS.length)] });
         lines.push({ indent, toks });
         if (n > 0 && indent < 3 && r() < 0.32) indent++;
       }
       return lines;
     };
+
+    // ---------- Lugares del cuarto (pies del personaje) ----------
+    const AISLE = 146;
+    const SEAT: Pt = [248, 100];
+    const STAND: Pt = [248, 116];
+    type Spot = { pos: Pt; dir: Dir; anim: string; dur: number };
+    const SPOTS: Record<string, Spot> = {
+      bookshelf: { pos: [120, 80], dir: 'up', anim: 'read', dur: 3600 },
+      poster: { pos: [161, 76], dir: 'up', anim: 'look', dur: 2600 },
+      window: { pos: [92, 76], dir: 'up', anim: 'look', dur: 2800 },
+      coffee: { pos: [326, 114], dir: 'right', anim: 'coffee', dur: 3800 },
+      homelab: { pos: [334, 80], dir: 'up', anim: 'check', dur: 3000 },
+      plant: { pos: [56, 172], dir: 'left', anim: 'water', dur: 2800 },
+      stretch: { pos: [196, 150], dir: 'down', anim: 'stretch', dur: 2600 },
+      cat: { pos: [0, 0], dir: 'left', anim: 'pet', dur: 2800 },
+    };
+    const BED_CAT: Pt = [64, 104];
 
     // ---------- Estado ----------
     const hour = new Date().getHours();
@@ -370,28 +397,40 @@ const roomData = {
       lamp: true,
       dark: 0,
       proj: 0,
-      code: genCode(0),
+      code: genCode(1),
       totalToks: 0,
       typed: 0,
       phase: 'typing' as 'typing' | 'think' | 'build' | 'deployed',
       phaseT: 0,
       thought: false,
       hover: null as string | null,
-      catUntil: 0,
       plantUntil: 0,
       notifUntil: 0,
-      nextNotif: 6000,
+      nextNotif: 7000,
       nextBlink: 2500,
       blinkUntil: 0,
-      steamUntil: 0,
       waveUntil: 0,
       cups: 3,
       interacted: false,
-      tick: 0,
+      nextRoutine: 9000,
+      holdUntil: 0,
+    };
+    const me = {
+      x: SEAT[0], y: SEAT[1], dir: 'up' as Dir,
+      mode: 'sit' as 'sit' | 'walk' | 'act',
+      path: [] as Pt[], walkT: 0,
+      goal: null as string | null,
+      actT: 0, actDur: 0, anim: '',
+    };
+    const cat = {
+      x: BED_CAT[0], y: BED_CAT[1], dir: 'right' as Dir,
+      mode: 'sleep' as 'sleep' | 'walk' | 'sit',
+      path: [] as Pt[], walkT: 0, until: 0, after: 'sit' as 'sit' | 'sleep',
+      meowUntil: 0, heartsUntil: 0, next: 30000,
     };
     const countToks = () => S.code.reduce((a, l) => a + l.toks.length, 0);
     S.totalToks = countToks();
-    S.dark = S.night ? 0.44 : 0;
+    S.dark = S.night ? 0.46 : 0;
     if (reduceMotion) S.typed = S.totalToks;
 
     const setProject = (i: number) => {
@@ -404,33 +443,146 @@ const roomData = {
       S.thought = false;
     };
 
+    // ---------- Movimiento ----------
+    const route = (from: Pt, to: Pt): Pt[] => {
+      const pts: Pt[] = [];
+      if (from[1] !== AISLE) pts.push([from[0], AISLE]);
+      if (from[0] !== to[0]) pts.push([to[0], AISLE]);
+      pts.push(to);
+      return pts;
+    };
+    const goTo = (goal: string) => {
+      if (reduceMotion) {
+        // Sin animación: teletransporte directo.
+        if (goal === 'desk') Object.assign(me, { x: SEAT[0], y: SEAT[1], dir: 'up', mode: 'sit', goal: null });
+        return;
+      }
+      if (goal === 'desk' && me.mode === 'sit') return;
+      let target: Pt;
+      if (goal === 'desk') target = STAND;
+      else if (goal === 'cat') target = [Math.round(cat.x + 16), Math.round(Math.max(cat.y, 84))];
+      else target = SPOTS[goal].pos;
+      if (me.mode === 'sit') {
+        me.x = STAND[0];
+        me.y = STAND[1];
+      }
+      me.goal = goal;
+      me.mode = 'walk';
+      me.walkT = 0;
+      me.path = route([Math.round(me.x), Math.round(me.y)], target);
+    };
+    const step = (o: { x: number; y: number; dir: Dir; path: Pt[]; walkT: number }, speed: number, dt: number) => {
+      o.walkT += dt;
+      let move = (speed * dt) / 1000;
+      while (move > 0 && o.path.length) {
+        const [tx, ty] = o.path[0];
+        const dx = tx - o.x;
+        const dy = ty - o.y;
+        const d = Math.hypot(dx, dy);
+        if (d < 0.01) {
+          o.path.shift();
+          continue;
+        }
+        o.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
+        const m = Math.min(move, d);
+        o.x += (dx / d) * m;
+        o.y += (dy / d) * m;
+        move -= m;
+      }
+      return o.path.length === 0;
+    };
+
+    const arrive = () => {
+      const g = me.goal!;
+      if (g === 'desk') {
+        me.x = SEAT[0];
+        me.y = SEAT[1];
+        me.dir = 'up';
+        me.mode = 'sit';
+        me.goal = null;
+        return;
+      }
+      const spot = SPOTS[g];
+      me.mode = 'act';
+      me.anim = spot.anim;
+      me.dir = spot.dir;
+      me.actT = 0;
+      me.actDur = spot.dur;
+      if (g === 'cat') {
+        cat.heartsUntil = S.t + 2400;
+        if (cat.mode === 'sleep') cat.meowUntil = S.t + 1600;
+      }
+      if (g === 'plant') S.plantUntil = S.t + 1600;
+      if (g === 'coffee') S.cups++;
+    };
+
     // ---------- Actualización ----------
     const update = (dt: number) => {
       S.t += dt;
-      S.phaseT += dt;
       const t = S.t;
 
-      if (reduceMotion) {
-        // Escena fija: código completo, sin ciclo de proyectos.
-      } else if (S.phase === 'typing') {
-        S.typed = Math.min(S.totalToks, S.typed + dt / 85);
-        if (!S.thought && S.typed >= S.totalToks * 0.55) {
-          S.phase = 'think';
+      // Monitor: solo avanza mientras Rogelio está sentado programando.
+      if (!reduceMotion && me.mode === 'sit') {
+        S.phaseT += dt;
+        if (S.phase === 'typing') {
+          S.typed = Math.min(S.totalToks, S.typed + dt / 85);
+          if (!S.thought && S.typed >= S.totalToks * 0.55) {
+            S.phase = 'think';
+            S.phaseT = 0;
+            S.thought = true;
+          } else if (S.typed >= S.totalToks) {
+            S.phase = 'build';
+            S.phaseT = 0;
+          }
+        } else if (S.phase === 'think' && S.phaseT > 1500) {
+          S.phase = 'typing';
           S.phaseT = 0;
-          S.thought = true;
-        } else if (S.typed >= S.totalToks) {
-          S.phase = 'build';
+        } else if (S.phase === 'build' && S.phaseT > 1700) {
+          S.phase = 'deployed';
           S.phaseT = 0;
+        } else if (S.phase === 'deployed' && S.phaseT > 2000) {
+          setProject(S.proj + 1);
+          if (!dialog.hidden && currentId === 'monitor') openDialog('monitor', false);
         }
-      } else if (S.phase === 'think' && S.phaseT > 1500) {
-        S.phase = 'typing';
-        S.phaseT = 0;
-      } else if (S.phase === 'build' && S.phaseT > 1700) {
-        S.phase = 'deployed';
-        S.phaseT = 0;
-      } else if (S.phase === 'deployed' && S.phaseT > 2000) {
-        setProject(S.proj + 1);
-        if (!dialog.hidden && currentId === 'monitor') openDialog('monitor', false);
+      }
+
+      if (!reduceMotion) {
+        // Personaje
+        if (me.mode === 'walk' && step(me, 42, dt)) arrive();
+        else if (me.mode === 'act') {
+          me.actT += dt;
+          if (me.anim === 'read' && me.actT > 900) me.dir = 'down';
+          if (me.anim === 'coffee' && me.actT > 2200) me.dir = 'down';
+          if (me.actT > me.actDur) goTo('desk');
+        }
+
+        // Rutina automática: se levanta de vez en cuando.
+        if (t > S.nextRoutine) {
+          S.nextRoutine = t + 15000 + Math.random() * 9000;
+          if (me.mode === 'sit' && t > S.holdUntil && dialog.hidden && S.phase !== 'deployed') {
+            const pool = ['coffee', 'bookshelf', 'cat', 'stretch', 'homelab', 'window', 'plant'];
+            goTo(pool[Math.floor(Math.random() * pool.length)]);
+          }
+        }
+
+        // Gato
+        if (cat.mode === 'walk' && step(cat, 30, dt)) {
+          cat.mode = cat.after;
+          cat.until = t + 9000 + Math.random() * 5000;
+          cat.dir = 'down';
+        } else if (cat.mode === 'sit' && t > cat.until) {
+          cat.mode = 'walk';
+          cat.after = 'sleep';
+          cat.walkT = 0;
+          cat.path = [[Math.round(cat.x), 124], [88, 124], BED_CAT];
+        } else if (cat.mode === 'sleep' && t > cat.next && me.mode !== 'walk') {
+          cat.next = t + 40000 + Math.random() * 20000;
+          const dest: Pt = Math.random() < 0.5 ? [180, 150] : [270, 118];
+          cat.mode = 'walk';
+          cat.after = 'sit';
+          cat.walkT = 0;
+          cat.path = [[88, 124], [dest[0], 124], dest];
+        }
       }
 
       if (t > S.nextBlink) {
@@ -439,457 +591,672 @@ const roomData = {
       }
       if (t > S.nextNotif) {
         S.notifUntil = t + 2600;
-        S.nextNotif = t + 14000 + Math.random() * 6000;
+        S.nextNotif = t + 15000 + Math.random() * 6000;
       }
-      const target = S.night ? (S.lamp ? 0.44 : 0.64) : S.lamp ? 0.02 : 0.06;
+      const target = S.night ? (S.lamp ? 0.46 : 0.64) : S.lamp ? 0.02 : 0.06;
       S.dark += (target - S.dark) * Math.min(1, dt / 180);
+
+      // Botones que siguen al personaje y al gato
+      placeBtn('me', me.x - 9, me.y - (me.mode === 'sit' ? 32 : 30), 18, me.mode === 'sit' ? 24 : 32);
+      placeBtn('cat', cat.x - 10, cat.y - 12, 20, 14);
     };
 
-    // ---------- Dibujo: cuarto ----------
-    const drawRoom = () => {
-      const t = S.t;
-      // Pared
-      R(0, 0, W, 134, P.wall);
-      for (let x = 10; x < W; x += 20) R(x, 4, 1, 124, P.wallStripe);
-      R(0, 0, W, 4, P.wallTop);
-      R(0, 128, W, 6, P.base);
-      R(0, 128, W, 1, P.baseHi);
-      // Piso
-      R(0, 134, W, 46, P.floor);
-      R(0, 134, W, 1, P.floorHi);
-      for (let row = 0; row < 6; row++) {
-        const y = 141 + row * 8;
-        R(0, y, W, 1, P.floorLine);
-        for (let x = (row * 37) % 48; x < W; x += 48) R(x, y - 7, 1, 7, P.floorLine);
+    // ---------- Escenario ----------
+    const drawShell = () => {
+      R(0, 0, W, H, P.void);
+      // Pared del fondo
+      R(16, 8, 352, 54, P.wall);
+      for (let x = 22; x < 368; x += 12) R(x, 10, 1, 48, P.wallStripe);
+      R(16, 8, 352, 3, P.wallTop);
+      R(16, 57, 352, 5, P.base);
+      R(16, 57, 352, 1, P.baseHi);
+      // Piso visto desde arriba
+      R(16, 62, 352, 138, P.floor);
+      for (let row = 0; row < 20; row++) {
+        const y = 62 + row * 7;
+        if (row % 2) R(16, y, 352, 7, P.floor2);
+        R(16, y, 352, 1, P.floorLine);
+        for (let x = 16 + ((row * 29) % 44); x < 368; x += 44) R(x, y, 1, 7, P.floorLine);
       }
-      // Tapete
-      R(142, 137, 94, 15, P.cobaltDk);
-      R(140, 138, 98, 13, P.cobaltDk);
-      R(144, 139, 90, 11, P.cobalt);
-      R(146, 141, 86, 1, P.cobaltHi);
-      R(146, 147, 86, 1, P.cobaltHi);
-      for (let x = 142; x < 236; x += 3) R(x, 152, 1, 2, P.creamDk);
-
-      drawWindow();
-      drawCat();
-      drawPlant();
-      drawBookshelf();
-      drawPoster();
-      drawClock();
-      drawDesk();
-      drawChar();
+      R(16, 62, 352, 1, P.floorHi);
+      // Oclusión ambiental junto a los muros
+      R(16, 62, 352, 4, 'rgba(0,0,0,0.18)');
+      R(16, 62, 352, 2, 'rgba(0,0,0,0.12)');
+      R(16, 62, 4, 138, 'rgba(0,0,0,0.16)');
+      R(364, 62, 4, 138, 'rgba(0,0,0,0.16)');
+      R(16, 196, 352, 4, 'rgba(0,0,0,0.16)');
+      // Muros laterales (vistos desde arriba)
+      R(8, 2, 368, 6, P.rim);
+      R(8, 2, 8, 206, P.rim);
+      R(368, 2, 8, 206, P.rim);
+      R(8, 200, 368, 8, P.rim);
+      R(16, 7, 352, 1, P.rimHi);
+      R(15, 8, 1, 192, P.rimHi);
+      R(368, 8, 1, 192, P.rimHi);
+      R(16, 200, 352, 1, P.rimHi);
     };
 
-    const drawWindow = () => {
+    const drawWallDecor = () => {
       const t = S.t;
-      // Cielo
+      // Ventana
+      const wx = 39, wy = 15, ww = 46, wh = 30;
       if (S.night) {
-        R(32, 24, 56, 12, '#1a2150');
-        R(32, 36, 56, 14, '#222b62');
-        R(32, 50, 56, 26, '#2b3672');
-        skyline.forEach(([x, y, w]) => R(x, y, w, 76 - y, '#141733'));
+        R(wx, wy, ww, 10, '#1a2150');
+        R(wx, wy + 10, ww, 10, '#222b62');
+        R(wx, wy + 20, ww, 10, '#2b3672');
+        skyline.forEach(([x, y, w]) => R(x, y, w, 45 - y, '#141733'));
         cityLights.forEach((l, i) => {
           if ((Math.floor(t / 2500) + i) % 5 !== 0) R(l.x, l.y, 1, 1, '#ffd36b');
         });
       } else {
-        R(32, 24, 56, 12, '#6fb6f5');
-        R(32, 36, 56, 14, '#8cc8fa');
-        R(32, 50, 56, 26, '#aad8ff');
-        disc(76, 32, 4, '#ffe28a');
-        R(75, 28, 3, 1, '#fff3c4');
-        // Nubes
+        R(wx, wy, ww, 10, '#6fb6f5');
+        R(wx, wy + 10, ww, 10, '#8cc8fa');
+        R(wx, wy + 20, ww, 10, '#aad8ff');
+        disc(76, 21, 3, '#ffe28a');
         ctx.save();
         ctx.beginPath();
-        ctx.rect(32, 24, 56, 52);
+        ctx.rect(wx, wy, ww, wh);
         ctx.clip();
-        const cx = ((t / 180) % 90) - 20;
-        R(32 + cx, 38, 14, 3, '#f4f8ff');
-        R(35 + cx, 36, 7, 2, '#f4f8ff');
-        const cx2 = ((t / 260 + 50) % 100) - 25;
-        R(32 + cx2, 46, 11, 2, '#eef4ff');
-        R(35 + cx2, 44, 5, 2, '#eef4ff');
+        const c1 = ((t / 200) % 80) - 18;
+        R(wx + c1, 24, 12, 2, '#f4f8ff');
+        R(wx + c1 + 3, 22, 6, 2, '#f4f8ff');
+        const c2 = ((t / 280 + 40) % 90) - 20;
+        R(wx + c2, 30, 9, 2, '#eef4ff');
         ctx.restore();
-        skyline.forEach(([x, y, w]) => R(x, y, w, 76 - y, '#7fa7d6'));
+        skyline.forEach(([x, y, w]) => R(x, y, w, 45 - y, '#7fa7d6'));
       }
-      // Marco
-      R(28, 20, 64, 4, P.cream);
-      R(28, 76, 64, 4, P.cream);
-      R(28, 20, 4, 60, P.cream);
-      R(88, 20, 4, 60, P.cream);
-      R(59, 24, 2, 52, P.cream);
-      R(32, 48, 56, 2, P.cream);
-      R(32, 24, 56, 1, P.creamDk);
-      R(32, 24, 1, 52, P.creamDk);
-      // Repisa
-      R(24, 80, 72, 4, P.cream);
-      R(24, 84, 72, 1, P.creamDk);
-      R(24, 85, 72, 1, '#2f3260');
+      R(36, 12, 52, 3, P.cream);
+      R(36, 45, 52, 3, P.cream);
+      R(36, 12, 3, 36, P.cream);
+      R(85, 12, 3, 36, P.cream);
+      R(61, 15, 2, 30, P.cream);
+      R(39, 29, 46, 2, P.cream);
+      R(39, 15, 46, 1, P.creamDk);
+      R(33, 48, 58, 3, P.cream);
+      R(33, 51, 58, 1, P.creamDk);
       // Cortinas
-      R(12, 13, 94, 2, '#1e2040');
-      R(16, 15, 14, 74, P.cobalt);
-      R(90, 15, 14, 74, P.cobalt);
-      [19, 24, 93, 99].forEach((x) => R(x, 15, 1, 74, P.cobaltDk));
-      R(16, 86, 14, 3, P.cobaltDk);
-      R(90, 86, 14, 3, P.cobaltDk);
+      R(28, 9, 68, 2, '#1e2040');
+      R(29, 11, 9, 40, P.cobalt);
+      R(86, 11, 9, 40, P.cobalt);
+      [32, 35, 89, 92].forEach((x) => R(x, 11, 1, 40, P.cobaltDk));
+      R(29, 49, 9, 2, P.cobaltDk);
+      R(86, 49, 9, 2, P.cobaltDk);
+
+      // Póster
+      R(150, 14, 22, 28, P.cream);
+      R(152, 16, 18, 24, '#26357f');
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(152, 16, 18, 24);
+      ctx.clip();
+      disc(165, 31, 3, '#ffb347');
+      for (let dy = 0; dy < 8; dy++) R(158 - dy, 32 + dy, 1 + dy * 2, 1, '#1a2360');
+      for (let dy = 0; dy < 7; dy++) R(167 - dy, 34 + dy, 1 + dy * 2, 1, '#141c4e');
+      ctx.restore();
+      text('SHIP', 153, 18, P.paper);
+      text('IT!', 155, 24, '#ffb347');
+      R(160, 12, 2, 3, '#e04848');
+
+      // Reloj (hora real)
+      const now = new Date();
+      disc(190, 24, 6, P.ink);
+      disc(190, 24, 5, P.cream);
+      const hA = ((now.getHours() % 12) + now.getMinutes() / 60) * (Math.PI / 6);
+      const mA = now.getMinutes() * (Math.PI / 30);
+      line(190, 24, 190 + Math.sin(hA) * 2.5, 24 - Math.cos(hA) * 2.5, 1, P.ink);
+      line(190, 24, 190 + Math.sin(mA) * 4, 24 - Math.cos(mA) * 4, 1, '#e04848');
+
+      // Notas adhesivas sobre el escritorio
+      R(204, 30, 6, 6, '#ffd36b');
+      R(204, 35, 6, 1, '#d9b24e');
+      R(212, 34, 6, 6, '#7fd4a0');
+      R(212, 39, 6, 1, '#5fae80');
+      R(205, 32, 4, 1, '#b8923a');
+
+      // Neón base (apagado)
+      text('</>', 322, 10, '#2d3570', 2);
     };
 
-    const drawCat = () => {
+    const drawFurniture = () => {
       const t = S.t;
-      const awake = t < S.catUntil;
-      if (!awake) {
-        const b = Math.sin(t / 650) > 0 ? 0 : 1;
-        R(33, 76, 2, 3, P.cat);
-        R(34, 78, 12, 2, P.cat);
-        R(39, 72 + b, 16, 1, P.cat);
-        R(38, 73 + b, 18, 7 - b, P.cat);
-        [42, 46, 50].forEach((x) => R(x, 73 + b, 1, 4, P.catDk));
-        R(52, 72, 8, 8, P.cat);
-        R(52, 70, 2, 2, P.cat);
-        R(57, 70, 2, 2, P.cat);
-        R(53, 71, 1, 1, '#f2a3a3');
-        R(58, 71, 1, 1, '#f2a3a3');
-        R(53, 75, 2, 1, P.catDk);
-        R(57, 75, 2, 1, P.catDk);
-        R(55, 77, 1, 1, '#e58a8a');
-        R(52, 79, 5, 1, P.catLt);
-        // Zzz
-        if (!reduceMotion) {
-          for (let i = 0; i < 2; i++) {
-            const ph = ((t / 2200 + i * 0.5) % 1);
-            const a = ph < 0.8 ? 1 : 0;
-            if (a) text('Z', 60 + ph * 6, 66 - ph * 12, `rgba(244,241,232,${(1 - ph).toFixed(2)})`);
-          }
-        }
-      } else {
-        R(36, 66, 2, 12, P.cat);
-        R(37, 64, 2, 3, P.cat);
-        R(40, 70, 14, 10, P.cat);
-        R(41, 69, 12, 1, P.cat);
-        [44, 48].forEach((x) => R(x, 71, 1, 5, P.catDk));
-        R(48, 74, 5, 6, P.catLt);
-        R(49, 62, 10, 9, P.cat);
-        R(49, 59, 3, 3, P.cat);
-        R(56, 59, 3, 3, P.cat);
-        R(50, 60, 1, 1, '#f2a3a3');
-        R(57, 60, 1, 1, '#f2a3a3');
-        R(51, 65, 2, 2, '#7fd46a');
-        R(55, 65, 2, 2, '#7fd46a');
-        R(52, 65, 1, 1, P.ink);
-        R(56, 65, 1, 1, P.ink);
-        R(54, 68, 1, 1, '#e58a8a');
-        const w = textW(C.catSays);
-        bubble(56, 46, w + 6, 9, 58);
-        text(C.catSays, 59, 48, P.ink);
-      }
+      // Tapete
+      R(142, 122, 106, 46, P.cobaltDk2);
+      R(140, 124, 110, 42, P.cobaltDk2);
+      R(144, 126, 102, 38, P.cobalt);
+      R(146, 128, 98, 1, P.cobaltHi);
+      R(146, 161, 98, 1, P.cobaltHi);
+      R(146, 128, 1, 34, P.cobaltHi);
+      R(243, 128, 1, 34, P.cobaltHi);
+      for (let x = 150; x < 242; x += 8) R(x, 131, 3, 1, P.cobaltDk);
+      for (let x = 150; x < 242; x += 8) R(x, 158, 3, 1, P.cobaltDk);
+      ellipse(195, 145, 16, 6, P.cobaltDk);
+      ellipse(195, 145, 10, 3, P.cobaltHi);
+
+      // Librero
+      R(98, 64, 44, 3, 'rgba(0,0,0,0.28)');
+      R(100, 16, 40, 4, P.woodHi);
+      R(100, 20, 40, 44, P.woodDk);
+      R(103, 23, 34, 38, P.woodDk2);
+      [33, 47].forEach((y) => {
+        R(100, y, 40, 3, P.wood);
+        R(100, y, 40, 1, P.woodHi);
+      });
+      R(100, 61, 40, 3, P.wood);
+      books.forEach((b) => {
+        R(b.x, b.y, b.w, b.h, b.c);
+        R(b.x, b.y, 1, b.h, 'rgba(0,0,0,0.22)');
+        R(b.x, b.y + 2, b.w, 1, 'rgba(255,255,255,0.22)');
+      });
+      R(130, 28, 5, 3, '#e8b33a');
+      R(131, 31, 3, 1, '#c8932a');
+      R(130, 32, 5, 1, '#6b4a2a');
+      R(131, 28, 1, 2, '#fff3c4');
+
+      // Cama
+      R(20, 134, 60, 3, 'rgba(0,0,0,0.28)');
+      R(20, 38, 58, 3, P.woodHi);
+      R(20, 41, 58, 21, P.woodDk);
+      R(24, 44, 50, 1, P.wood);
+      R(22, 62, 54, 64, P.cream);
+      R(28, 65, 42, 11, P.paper);
+      R(28, 74, 42, 2, P.creamDk);
+      R(48, 66, 1, 8, P.creamDk);
+      R(22, 80, 54, 46, P.cobalt);
+      R(22, 80, 54, 4, P.cobaltHi);
+      for (let y = 90; y < 124; y += 8) R(22, y, 54, 1, P.cobaltDk);
+      R(22, 84, 2, 42, P.cobaltDk);
+      R(20, 126, 58, 8, P.woodDk);
+      R(20, 126, 58, 1, P.wood);
+
+      // Escritorio
+      R(190, 92, 116, 3, 'rgba(0,0,0,0.28)');
+      R(190, 52, 114, 24, P.wood);
+      R(190, 52, 114, 1, P.woodHi);
+      R(196, 60, 30, 1, 'rgba(0,0,0,0.08)');
+      R(270, 70, 24, 1, 'rgba(0,0,0,0.08)');
+      R(190, 76, 114, 8, P.woodDk);
+      R(190, 76, 114, 1, P.woodHi);
+      R(270, 78, 30, 5, P.woodDk2);
+      R(282, 80, 6, 1, P.woodHi);
+      R(192, 84, 4, 9, P.woodDk2);
+      R(298, 84, 4, 9, P.woodDk2);
+      // Monitor
+      R(242, 57, 12, 3, '#2a2c40');
+      R(246, 52, 4, 6, '#2a2c40');
+      R(220, 26, 56, 30, P.ink);
+      R(220, 26, 56, 1, '#2c3150');
+      R(223, 29, 50, 24, '#0b0d1f');
+      // Teclado y mouse
+      R(228, 62, 34, 8, '#2a2c40');
+      for (let y = 63; y < 69; y += 2) for (let x = 229; x < 261; x += 2) R(x, y, 1, 1, '#4a4d6b');
+      R(236, 67, 18, 1, '#4a4d6b');
+      R(268, 63, 5, 7, '#d8d8e0');
+      R(268, 63, 5, 1, '#f4f4fa');
+      R(270, 64, 1, 2, '#9a9aaa');
+      // Taza (vista de arriba)
+      R(205, 55, 6, 8, '#ecebf2');
+      R(204, 56, 8, 6, '#ecebf2');
+      R(206, 57, 4, 4, '#4a2c1a');
+      R(212, 58, 2, 2, '#ecebf2');
+      R(204, 59, 8, 1, P.cobalt);
+      // Teléfono (vista de arriba)
+      const vib = t < S.notifUntil && t > S.notifUntil - 2000 && Math.floor(t / 60) % 2 === 0 ? 1 : 0;
+      R(205 + vib, 66, 7, 11, '#111320');
+      // Lámpara
+      R(284, 60, 12, 4, '#1e2040');
+      R(284, 60, 12, 1, '#34375e');
+      line(290, 60, 294, 42, 2, '#1e2040');
+      line(294, 42, 286, 36, 2, '#1e2040');
+      R(276, 33, 13, 5, P.cobalt);
+      R(276, 33, 13, 1, P.cobaltHi);
+      R(275, 37, 15, 2, P.cobaltDk);
+      // Cactus
+      R(296, 56, 6, 6, P.pot);
+      R(296, 56, 6, 1, P.potHi);
+      R(298, 47, 2, 9, P.leaf2);
+      R(296, 50, 2, 3, P.leaf2);
+      R(300, 49, 2, 3, P.leaf2);
+      R(298, 47, 1, 9, P.leaf3);
+      // Bote de basura con bolas de papel
+      R(306, 93, 11, 2, 'rgba(0,0,0,0.28)');
+      R(307, 84, 9, 9, '#555a70');
+      ellipse(311, 84, 4, 2, '#6b7090');
+      R(309, 83, 3, 2, P.paper);
+      R(312, 84, 2, 1, '#d8d4c8');
+      R(318, 90, 3, 2, P.paper);
+
+      // Homelab (rack)
+      R(316, 62, 36, 3, 'rgba(0,0,0,0.3)');
+      R(318, 26, 32, 4, '#2c2f45');
+      R(318, 30, 32, 32, '#1d1f33');
+      [31, 42, 53].forEach((y) => {
+        R(320, y, 28, 9, '#26293f');
+        R(320, y, 28, 1, '#30344e');
+        for (let yy = y + 2; yy < y + 8; yy += 2) R(334, yy, 12, 1, '#15172a');
+      });
+
+      // Estación de café
+      R(338, 132, 30, 3, 'rgba(0,0,0,0.28)');
+      R(340, 98, 26, 20, P.wood);
+      R(340, 98, 26, 1, P.woodHi);
+      R(340, 118, 26, 7, P.woodDk);
+      R(340, 118, 26, 1, P.woodHi);
+      R(342, 125, 3, 8, P.woodDk2);
+      R(361, 125, 3, 8, P.woodDk2);
+      R(345, 86, 13, 2, '#34375e');
+      R(345, 88, 13, 16, '#2a2c40');
+      R(347, 91, 9, 3, '#15172a');
+      R(348, 97, 7, 6, 'rgba(200,220,255,0.35)');
+      R(348, 100, 7, 3, '#5a3520');
+      R(360, 104, 4, 2, '#ecebf2');
+      R(360, 107, 4, 2, '#ecebf2');
+      R(360, 110, 4, 2, P.cobalt);
+
+      // Planta grande
+      drawPlant();
     };
 
     const drawPlant = () => {
       const t = S.t;
       const shaking = t < S.plantUntil;
+      R(20, 196, 24, 2, 'rgba(0,0,0,0.25)');
       const leaves: [number, number, number, number, string][] = [
-        [12, 96, 3, 22, P.leaf1], [6, 100, 6, 4, P.leaf2], [3, 97, 4, 3, P.leaf2], [16, 93, 6, 4, P.leaf3],
-        [20, 89, 4, 4, P.leaf3], [7, 108, 5, 3, P.leaf3], [2, 105, 5, 3, P.leaf2], [17, 104, 7, 3, P.leaf2],
-        [22, 100, 4, 3, P.leaf1], [9, 90, 4, 7, P.leaf2], [12, 85, 3, 6, P.leaf3], [5, 93, 4, 3, P.leaf1],
+        [30, 150, 3, 26, P.leaf1], [22, 156, 8, 5, P.leaf2], [18, 152, 6, 4, P.leaf2], [34, 148, 8, 5, P.leaf3],
+        [39, 144, 5, 4, P.leaf3], [24, 164, 6, 4, P.leaf3], [19, 162, 6, 3, P.leaf2], [35, 160, 8, 4, P.leaf2],
+        [40, 155, 5, 3, P.leaf1], [26, 146, 5, 7, P.leaf2], [30, 141, 4, 6, P.leaf3], [22, 150, 4, 3, P.leaf1],
       ];
       leaves.forEach(([x, y, w, h, c], i) => {
         const amp = shaking ? 2 : 1;
         const speed = shaking ? 90 : 900;
-        const dx = y < 104 && !reduceMotion ? Math.round(Math.sin(t / speed + i) * amp * ((104 - y) / 18)) : 0;
+        const dx = !reduceMotion ? Math.round(Math.sin(t / speed + i) * amp * ((170 - y) / 26)) : 0;
         R(x + dx, y, w, h, c);
       });
-      R(6, 117, 18, 4, P.potHi);
-      R(8, 121, 14, 15, P.pot);
-      R(18, 121, 3, 15, P.potDk);
-      R(8, 136, 14, 2, 'rgba(0,0,0,0.25)');
+      ellipse(32, 177, 10, 3, P.potHi);
+      ellipse(32, 177, 8, 2, '#4a2c1a');
+      R(23, 178, 19, 17, P.pot);
+      R(37, 178, 4, 17, P.potDk);
+      R(23, 178, 19, 1, P.potHi);
     };
 
-    const drawBookshelf = () => {
-      R(106, 140, 44, 3, 'rgba(0,0,0,0.25)');
-      R(108, 46, 40, 96, P.woodDk);
-      R(111, 49, 34, 88, P.woodDk2);
-      [46, 68, 90, 112].forEach((y) => {
-        R(108, y, 40, 3, P.wood);
-        R(108, y, 40, 1, P.woodHi);
-      });
-      R(108, 136, 40, 6, P.wood);
-      R(108, 136, 40, 1, P.woodHi);
-      books.forEach((b) => {
-        R(b.x, b.y, b.w, b.h, b.c);
-        R(b.x, b.y, 1, b.h, 'rgba(0,0,0,0.22)');
-        if (b.h > 12) R(b.x, b.y + 3, b.w, 1, 'rgba(255,255,255,0.25)');
-      });
-      // Trofeo (repisa 2)
-      R(137, 79, 6, 4, '#e8b33a');
-      R(136, 80, 1, 2, '#e8b33a');
-      R(143, 80, 1, 2, '#e8b33a');
-      R(139, 83, 2, 3, '#c8932a');
-      R(137, 86, 6, 4, '#6b4a2a');
-      R(138, 80, 1, 2, '#fff3c4');
-      // Libros acostados (repisa 4)
-      R(137, 131, 8, 2, '#c94f4f');
-      R(138, 128, 7, 3, '#4f8fc9');
-      R(137, 125, 8, 3, '#e0b34a');
-      R(139, 122, 5, 3, '#5fb07a');
-    };
-
-    const drawPoster = () => {
-      R(156, 22, 26, 36, P.cream);
-      R(158, 24, 22, 32, '#26357f');
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(158, 24, 22, 32);
-      ctx.clip();
-      disc(174, 44, 4, '#ffb347');
-      for (let dy = 0; dy < 12; dy++) R(165 - dy, 44 + dy, 1 + dy * 2, 1, '#1a2360');
-      for (let dy = 0; dy < 10; dy++) R(176 - dy, 47 + dy, 1 + dy * 2, 1, '#141c4e');
-      ctx.restore();
-      text('SHIP', 161, 27, '#f4f1e8');
-      text('IT!', 163, 33, '#ffb347');
-      R(168, 20, 2, 3, '#e04848');
-    };
-
-    const drawClock = () => {
-      const now = new Date();
-      disc(239, 21, 7, P.ink);
-      disc(239, 21, 6, P.cream);
-      [[239, 16], [244, 21], [239, 26], [234, 21]].forEach(([x, y]) => R(x, y, 1, 1, P.creamDk));
-      const h = ((now.getHours() % 12) + now.getMinutes() / 60) * (Math.PI / 6);
-      const m = now.getMinutes() * (Math.PI / 30);
-      line(239, 21, 239 + Math.sin(h) * 3, 21 - Math.cos(h) * 3, 1, P.ink);
-      line(239, 21, 239 + Math.sin(m) * 5, 21 - Math.cos(m) * 5, 1, '#e04848');
-    };
-
-    const drawDesk = () => {
-      // Homelab (debajo del escritorio)
-      R(270, 141, 36, 2, 'rgba(0,0,0,0.3)');
-      R(274, 117, 28, 11, '#1d1f33');
-      R(274, 129, 28, 13, '#1d1f33');
-      R(275, 118, 26, 9, '#26293f');
-      R(275, 130, 26, 11, '#26293f');
-      for (let y = 120; y < 126; y += 2) R(288, y, 11, 1, '#15172a');
-      for (let y = 132; y < 140; y += 2) R(288, y, 11, 1, '#15172a');
-      R(300, 110, 1, 7, '#15172a');
-      // Patas y cubierta
-      R(186, 140, 128, 2, 'rgba(0,0,0,0.25)');
-      R(188, 110, 4, 32, P.woodDk);
-      R(306, 110, 4, 32, P.woodDk);
-      R(184, 104, 130, 4, P.wood);
-      R(184, 104, 130, 1, P.woodHi);
-      R(184, 108, 130, 2, P.woodDk);
-      // Monitor
-      R(239, 96, 6, 7, '#2a2c40');
-      R(234, 102, 16, 2, '#2a2c40');
-      R(214, 56, 56, 40, P.ink);
-      R(214, 56, 56, 1, '#262a45');
-      R(216, 58, 52, 36, '#0b0d1f');
-      // Teclado y mouse
-      R(208, 101, 26, 3, '#2a2c40');
-      for (let x = 209; x < 233; x += 2) R(x, 101, 1, 1, '#4a4d6b');
-      R(252, 101, 6, 3, '#d8d8e0');
-      R(252, 101, 6, 1, '#f4f4fa');
-      // Taza
-      R(264, 95, 8, 9, '#ecebf2');
-      R(264, 95, 8, 1, '#4a2c1a');
-      R(264, 98, 8, 2, P.cobalt);
-      R(272, 97, 2, 1, '#ecebf2');
-      R(273, 97, 1, 4, '#ecebf2');
-      R(272, 100, 2, 1, '#ecebf2');
-      R(270, 96, 2, 8, '#cfcdd8');
-      // Teléfono en base
-      const vib = S.t < S.notifUntil && S.t > S.notifUntil - 2000 && Math.floor(S.t / 60) % 2 === 0 ? 1 : 0;
-      R(279, 100, 9, 4, '#3a3d55');
-      R(280 + vib, 87, 7, 13, '#111320');
-      // Lámpara
-      R(296, 101, 13, 3, '#1e2040');
-      R(296, 101, 13, 1, '#34375e');
-      line(302, 101, 306, 80, 2, '#1e2040');
-      line(306, 80, 299, 70, 2, '#1e2040');
-      R(290, 67, 12, 4, P.cobalt);
-      R(288, 71, 12, 3, P.cobalt);
-      R(290, 67, 12, 1, P.cobaltHi);
-      R(288, 73, 12, 1, P.cobaltDk);
-      R(303, 69, 3, 3, '#1e2040');
-      // Neon (base apagada)
-      text('</>', 284, 25, '#2d3570', 2);
+    // ---------- Silla ----------
+    const drawChairBack = () => {
+      R(234, 109, 28, 4, 'rgba(0,0,0,0.28)');
+      R(246, 102, 4, 6, P.metal);
+      R(236, 107, 24, 2, P.chairHi);
+      R(235, 109, 3, 2, '#0e0f18');
+      R(246, 109, 3, 2, '#0e0f18');
+      R(258, 109, 3, 2, '#0e0f18');
+      R(238, 93, 20, 10, P.chair);
+      R(239, 92, 18, 1, P.chair);
+      R(239, 93, 18, 1, P.chairHi);
+      R(246, 94, 4, 8, P.cobaltDk);
+      R(247, 94, 1, 8, P.cobalt);
     };
 
     // ---------- Personaje ----------
-    const drawChar = () => {
+    const drawMe = () => {
       const t = S.t;
-      const hovered = S.hover === 'me';
-      const pose = hovered || t < S.waveUntil ? 'wave' : S.phase === 'think' ? 'think' : S.phase === 'deployed' ? 'celebrate' : S.phase === 'typing' ? 'type' : 'idle';
-      const tp = pose === 'type' && !reduceMotion ? Math.floor(t / 110) % 2 : 0;
-      const oy = pose === 'type' && !reduceMotion && Math.floor(t / 1300) % 5 === 0 ? 1 : 0;
-
-      // Silla (respaldo)
-      R(166, 66, 10, 50, P.chair);
-      R(167, 64, 8, 2, P.chair);
-      R(169, 68, 2, 44, P.cobaltDk);
-      R(166, 66, 1, 50, P.chairHi);
-      // Asiento y base
-      R(166, 112, 38, 5, P.chair);
-      R(166, 112, 38, 1, P.chairHi);
-      R(183, 117, 4, 17, P.metal);
-      R(170, 133, 30, 3, P.chairHi);
-      [169, 183, 197].forEach((x) => R(x, 136, 3, 3, '#0e0f18'));
-
-      // Pierna lejana
-      R(200, 112, 8, 4, P.jeansDk);
-      R(202, 115, 5, 22, P.jeansDk);
-      R(201, 137, 10, 3, P.sole);
-      // Pierna cercana
-      R(186, 107, 28, 8, P.jeans);
-      R(186, 107, 28, 1, '#3a4d82');
-      R(208, 114, 7, 22, P.jeans);
-      R(213, 114, 2, 22, P.jeansDk);
-      R(207, 136, 13, 4, P.shoe);
-      R(207, 139, 13, 1, P.sole);
-      R(215, 136, 5, 1, '#ffffff');
-
-      // Brazo lejano (detrás del torso)
-      if (pose === 'type' || pose === 'think' || pose === 'idle') {
-        line(192, 86, 199, 97, 4, P.hoodDk);
-        line(199, 97, 214, 100, 3, P.hoodDk);
-        R(214, 98 + (1 - tp), 3, 2, P.skinDk);
+      const x = Math.round(me.x);
+      const y = Math.round(me.y);
+      if (me.mode === 'sit') {
+        drawSeated(x, y);
+        return;
       }
+      const walking = me.mode === 'walk';
+      const frame = walking && !reduceMotion ? Math.floor(me.walkT / 130) % 4 : 0;
+      const hovered = S.hover === 'me' || t < S.waveUntil;
+      let dir = me.dir;
+      if (hovered && !walking) dir = 'down';
+      drawPerson(x, y, dir, frame, walking);
 
-      // Torso
-      R(177, 76, 9, 9, P.hoodDk);
-      R(178, 77, 6, 2, P.hoodHi);
-      R(180, 80, 15, 2, P.hood);
-      R(178, 82, 20, 32, P.hood);
-      R(194, 84, 4, 28, P.hoodHi);
-      R(188, 102, 10, 6, P.hoodDk);
-      R(196, 83, 1, 7, '#d8d8e0');
-      R(197, 83, 1, 6, '#d8d8e0');
-
-      // Cabeza
-      R(189, 77, 6, 5, P.skinDk);
-      if (pose === 'wave') {
-        const y = oy;
-        R(186, 64 + y, 13, 14, P.skin);
-        R(187, 78 + y, 11, 1, P.skin);
-        R(189, 79 + y, 7, 1, P.skin);
-        R(185, 70 + y, 1, 3, P.skinDk);
-        R(199, 70 + y, 1, 3, P.skinDk);
-        R(185, 59 + y, 15, 6, P.hair);
-        R(184, 61 + y, 2, 10, P.hair);
-        R(199, 61 + y, 2, 9, P.hair);
-        R(186, 57 + y, 2, 2, P.hair);
-        R(190, 56 + y, 2, 3, P.hair);
-        R(195, 57 + y, 2, 2, P.hair);
-        R(198, 58 + y, 2, 2, P.hair);
-        R(187, 64 + y, 6, 2, P.hair);
-        R(193, 64 + y, 4, 1, P.hair);
-        R(188, 66 + y, 2, 1, P.hair);
-        R(188, 60 + y, 6, 1, P.hairHi);
-        // Lentes
-        const frame = '#0e0e14';
-        [[187, 69], [193, 69]].forEach(([x, yy]) => {
-          R(x, yy + y, 5, 1, frame);
-          R(x, yy + 3 + y, 5, 1, frame);
-          R(x, yy + y, 1, 4, frame);
-          R(x + 4, yy + y, 1, 4, frame);
-        });
-        R(192, 70 + y, 1, 1, frame);
-        const blink = S.t < S.blinkUntil;
-        if (blink) {
-          R(188, 71 + y, 3, 1, P.skinDk);
-          R(194, 71 + y, 3, 1, P.skinDk);
-        } else {
-          R(189, 70 + y, 1, 2, P.hair);
-          R(195, 70 + y, 1, 2, P.hair);
+      // Animaciones de actividad
+      if (me.mode === 'act' && !hovered) {
+        const a = me.anim;
+        const at = me.actT;
+        if (a === 'read' && dir === 'down') {
+          R(x - 5, y - 12, 10, 6, '#c94f4f');
+          R(x - 4, y - 12, 8, 5, P.paper);
+          R(x, y - 12, 1, 5, P.creamDk);
+          for (let i = 0; i < 3; i++) {
+            R(x - 3, y - 11 + i * 1.5, 2, 1, '#8a8a9a');
+            R(x + 2, y - 11 + i * 1.5, 2, 1, '#8a8a9a');
+          }
+          R(x - 7, y - 10, 2, 3, P.skin);
+          R(x + 5, y - 10, 2, 3, P.skin);
+        } else if (a === 'look') {
+          say(me.goal === 'window' ? (S.night ? '...' : '!') : '✓', x, y - 42);
+        } else if (a === 'coffee') {
+          if (at < 2200) {
+            // cafetera sirviendo
+            if (Math.floor(t / 150) % 2) R(351, 95, 1, 2, '#5a3520');
+          } else {
+            R(x + 5, y - 11, 4, 4, '#ecebf2');
+            R(x + 6, y - 11, 2, 1, '#4a2c1a');
+            for (let i = 0; i < 2; i++) {
+              const ph = (t / 700 + i / 2) % 1;
+              R(x + 6 + i, y - 13 - ph * 7, 1, 2, `rgba(235,235,245,${(0.6 * (1 - ph)).toFixed(2)})`);
+            }
+          }
+        } else if (a === 'check') {
+          say('OK', x, y - 42, '#1f8a4c');
+        } else if (a === 'water') {
+          R(x - 11, y - 14, 5, 4, '#6d8bff');
+          R(x - 13, y - 15, 3, 1, '#6d8bff');
+          for (let i = 0; i < 3; i++) {
+            const ph = (t / 400 + i / 3) % 1;
+            R(x - 14 - i, y - 14 + ph * 10, 1, 1, '#89ddff');
+          }
+        } else if (a === 'stretch') {
+          const up = Math.floor(at / 400) % 2;
+          R(x - 7, y - 30 - up, 2, 7, P.hood);
+          R(x + 5, y - 30 - up, 2, 7, P.hood);
+          R(x - 7, y - 32 - up, 2, 2, P.skin);
+          R(x + 5, y - 32 - up, 2, 2, P.skin);
         }
-        R(190, 75 + y, 5, 1, P.mouth);
-        R(189, 74 + y, 1, 1, P.mouth);
-        R(195, 74 + y, 1, 1, P.mouth);
-      } else {
-        const y = oy;
-        R(187, 65 + y, 13, 13, P.skin);
-        R(188, 78 + y, 8, 1, P.skin);
-        R(200, 71 + y, 1, 2, P.skin);
-        R(197, 76 + y, 2, 1, P.mouth);
-        R(189, 70 + y, 3, 4, P.skinDk);
-        R(190, 71 + y, 1, 2, '#8f5a3c');
-        R(185, 60 + y, 15, 6, P.hair);
-        R(184, 62 + y, 6, 15, P.hair);
-        R(186, 58 + y, 2, 2, P.hair);
-        R(190, 57 + y, 2, 3, P.hair);
-        R(194, 58 + y, 2, 2, P.hair);
-        R(197, 59 + y, 2, 2, P.hair);
-        R(183, 61 + y, 2, 3, P.hair);
-        R(196, 64 + y, 5, 3, P.hair);
-        R(199, 66 + y, 2, 2, P.hair);
-        R(190, 66 + y, 2, 3, P.hair);
-        R(188, 61 + y, 6, 1, P.hairHi);
-        const frame = '#0e0e14';
-        R(194, 69 + y, 6, 1, frame);
-        R(194, 72 + y, 6, 1, frame);
-        R(194, 69 + y, 1, 4, frame);
-        R(199, 69 + y, 1, 4, frame);
-        R(191, 70 + y, 3, 1, frame);
-        if (S.t < S.blinkUntil) R(196, 71 + y, 2, 1, P.skinDk);
-        else R(197, 70 + y, 1, 2, P.hair);
-        R(198, 70 + y, 1, 1, 'rgba(159,211,255,0.8)');
       }
-
-      // Brazo cercano
-      if (pose === 'type' || pose === 'idle') {
-        line(189, 85, 195, 97, 5, P.armNear);
-        line(195, 97, 208, 100, 4, P.armNear);
-        R(206, 98, 2, 4, P.hoodDk);
-        R(208, 99 - tp, 4, 3, P.skin);
-      } else if (pose === 'think') {
-        line(189, 85, 195, 98, 5, P.armNear);
-        line(195, 98, 198, 83, 4, P.armNear);
-        R(196, 78, 4, 4, P.skin);
-        const dots = reduceMotion ? 3 : Math.floor(t / 300) % 4;
-        bubble(202, 44, 17, 9, 203);
-        for (let i = 0; i < dots; i++) R(205 + i * 4, 48, 2, 2, P.ink);
-      } else if (pose === 'celebrate') {
-        line(189, 84, 193, 72, 5, P.armNear);
-        line(193, 72, 196, 59, 4, P.armNear);
-        R(194, 54, 5, 5, P.skin);
-        if (!reduceMotion && Math.floor(t / 180) % 2 === 0) {
-          [[190, 52], [201, 53], [196, 49], [203, 58]].forEach(([x, y]) => R(x, y, 1, 1, '#ffd36b'));
-        } else {
-          [[191, 55], [200, 50], [188, 58]].forEach(([x, y]) => R(x, y, 1, 1, '#ffd36b'));
-        }
-      } else if (pose === 'wave') {
+      if (hovered && !walking) {
         const w = reduceMotion ? 0 : Math.floor(t / 220) % 2;
-        line(190, 85, 199, 80, 5, P.armNear);
-        line(199, 80, 203 + w, 66, 4, P.armNear);
-        R(201 + w, 60, 5, 6, P.skin);
-        R(201 + w, 59, 1, 2, P.skin);
-        R(203 + w, 58, 1, 2, P.skin);
-        R(205 + w, 59, 1, 2, P.skin);
-        const msg = C.hello;
-        const bw = textW(msg) + 6;
-        bubble(168, 40, bw, 9, 182);
-        text(msg, 171, 42, P.ink);
+        R(x + 5, y - 22 - w, 2, 8, P.hood);
+        R(x + 5, y - 25 - w, 3, 3, P.skin);
+        say(C.hello, x, y - 44);
       }
     };
 
-    // ---------- Capas emisivas (después de la sombra nocturna) ----------
+    // Dibujo espejo para las vistas laterales.
+    const drawPerson = (x: number, y: number, dir: Dir, frame: number, walking: boolean) => {
+      const s = dir === 'left' ? -1 : 1;
+      const M = (dx: number, dy: number, w: number, h: number, c: string) =>
+        s === 1 ? R(x + dx, y + dy, w, h, c) : R(x - dx - w, y + dy, w, h, c);
+      const blink = S.t < S.blinkUntil;
+      R(x - 6, y - 1, 12, 3, 'rgba(0,0,0,0.25)');
+
+      if (dir === 'up' || dir === 'down') {
+        const lo = frame === 1 ? -1 : 0;
+        const ro = frame === 3 ? -1 : 0;
+        R(x - 4, y - 6, 3, 5 + lo, P.jeans);
+        R(x + 1, y - 6, 3, 5 + ro, P.jeans);
+        R(x - 4, y - 1 + lo, 3, 1, P.shoe);
+        R(x + 1, y - 1 + ro, 3, 1, P.shoe);
+        const a = walking ? (frame === 1 ? 1 : frame === 3 ? -1 : 0) : 0;
+        R(x - 7, y - 13 + a, 2, 7, P.arm);
+        R(x + 5, y - 13 - a, 2, 7, P.arm);
+        R(x - 7, y - 6 + a, 2, 2, P.skin);
+        R(x + 5, y - 6 - a, 2, 2, P.skin);
+        R(x - 5, y - 14, 10, 9, P.hood);
+        R(x - 5, y - 14, 10, 1, P.hoodHi);
+        if (dir === 'down') {
+          R(x - 3, y - 9, 6, 2, P.hoodDk);
+          R(x - 2, y - 13, 1, 3, '#d8d8e0');
+          R(x + 1, y - 13, 1, 3, '#d8d8e0');
+          // Cabeza de frente
+          R(x - 4, y - 23, 8, 9, P.skin);
+          R(x - 3, y - 14, 6, 1, P.skin);
+          R(x - 5, y - 20, 1, 2, P.skinDk);
+          R(x + 4, y - 20, 1, 2, P.skinDk);
+          R(x - 5, y - 27, 10, 5, P.hair);
+          R(x - 5, y - 22, 1, 3, P.hair);
+          R(x + 4, y - 22, 1, 3, P.hair);
+          R(x - 4, y - 28, 2, 1, P.hair);
+          R(x, y - 29, 2, 2, P.hair);
+          R(x + 3, y - 28, 1, 1, P.hair);
+          R(x - 4, y - 22, 3, 1, P.hair);
+          R(x + 1, y - 22, 2, 1, P.hair);
+          R(x - 3, y - 27, 4, 1, P.hairHi);
+          // Lentes
+          R(x - 4, y - 20, 3, 1, P.frame);
+          R(x + 1, y - 20, 3, 1, P.frame);
+          R(x - 4, y - 18, 3, 1, P.frame);
+          R(x + 1, y - 18, 3, 1, P.frame);
+          R(x - 1, y - 20, 2, 1, P.frame);
+          if (blink) {
+            R(x - 3, y - 19, 1, 1, P.skinDk);
+            R(x + 2, y - 19, 1, 1, P.skinDk);
+          } else {
+            R(x - 3, y - 19, 1, 1, P.hair);
+            R(x + 2, y - 19, 1, 1, P.hair);
+          }
+          R(x - 1, y - 16, 2, 1, P.mouth);
+        } else {
+          R(x - 3, y - 14, 6, 3, P.hoodDk);
+          R(x - 5, y - 20, 1, 2, P.skinDk);
+          R(x + 4, y - 20, 1, 2, P.skinDk);
+          R(x - 4, y - 25, 8, 11, P.hair);
+          R(x - 5, y - 26, 10, 7, P.hair);
+          R(x - 4, y - 28, 2, 2, P.hair);
+          R(x, y - 29, 2, 3, P.hair);
+          R(x + 3, y - 28, 1, 2, P.hair);
+          R(x - 3, y - 25, 5, 1, P.hairHi);
+          R(x - 5, y - 19, 1, 1, P.frame);
+          R(x + 4, y - 19, 1, 1, P.frame);
+        }
+      } else {
+        // Perfil
+        if (walking && frame % 2 === 1) {
+          const f = frame === 1;
+          M(-4, -6, 3, 5, f ? P.jeansDk : P.jeans);
+          M(1, -6, 3, 5, f ? P.jeans : P.jeansDk);
+          M(-4, -1, 3, 1, P.shoe);
+          M(2, -1, 3, 1, P.shoe);
+        } else {
+          M(-2, -6, 4, 5, P.jeans);
+          M(-2, -1, 5, 1, P.shoe);
+        }
+        M(-4, -14, 8, 9, P.hood);
+        M(-4, -14, 8, 1, P.hoodHi);
+        M(-4, -14, 2, 4, P.hoodDk);
+        const sw = walking ? (frame === 1 ? 2 : frame === 3 ? -2 : 0) : 0;
+        const petting = me.mode === 'act' && me.anim === 'pet';
+        if (petting) {
+          const pw = Math.floor(S.t / 250) % 2;
+          M(0, -12, 8, 2, P.arm);
+          M(8, -12 + pw, 2, 2, P.skin);
+        } else {
+          M(-1 + sw, -13, 2, 7, P.arm);
+          M(-1 + sw, -6, 2, 2, P.skin);
+        }
+        M(-3, -23, 8, 9, P.skin);
+        M(-2, -14, 5, 1, P.skin);
+        M(5, -19, 1, 1, P.skin);
+        M(-4, -27, 9, 5, P.hair);
+        M(-5, -24, 4, 8, P.hair);
+        M(-3, -28, 2, 1, P.hair);
+        M(0, -29, 2, 2, P.hair);
+        M(3, -28, 2, 1, P.hair);
+        M(1, -22, 4, 2, P.hair);
+        M(-2, -20, 2, 2, P.skinDk);
+        M(-3, -27, 5, 1, P.hairHi);
+        M(1, -20, 4, 1, P.frame);
+        M(4, -20, 1, 3, P.frame);
+        M(0, -20, 1, 1, P.frame);
+        M(3, -19, 1, 1, blink ? P.skinDk : P.hair);
+        M(3, -16, 2, 1, P.mouth);
+      }
+    };
+
+    const drawSeated = (x: number, y: number) => {
+      const t = S.t;
+      const hovered = S.hover === 'me' || t < S.waveUntil;
+      const pose = hovered ? 'wave' : S.phase === 'think' ? 'think' : S.phase === 'deployed' ? 'celebrate' : S.phase === 'typing' ? 'type' : 'idle';
+      const tp = pose === 'type' && !reduceMotion ? Math.floor(t / 110) % 2 : 0;
+      const bob = pose === 'type' && !reduceMotion && Math.floor(t / 1300) % 5 === 0 ? 1 : 0;
+
+      // Hombros y espalda
+      R(x - 7, y - 17, 14, 10, P.hood);
+      R(x - 6, y - 18, 12, 1, P.hood);
+      R(x - 7, y - 17, 14, 1, P.hoodHi);
+      R(x - 4, y - 17, 8, 4, P.hoodDk);
+      R(x - 3, y - 17, 6, 1, P.hoodHi);
+
+      // Brazos
+      if (pose === 'type' || pose === 'idle') {
+        line(x - 6, y - 15, x - 9, y - 21, 3, P.arm);
+        line(x - 9, y - 21, x - 7, y - 28, 2, P.arm);
+        R(x - 8, y - 31 + tp, 3, 2, P.skin);
+        line(x + 6, y - 15, x + 9, y - 21, 3, P.arm);
+        line(x + 9, y - 21, x + 7, y - 28, 2, P.arm);
+        R(x + 5, y - 30 - tp, 3, 2, P.skin);
+      } else if (pose === 'think') {
+        line(x - 6, y - 15, x - 9, y - 21, 3, P.arm);
+        line(x - 9, y - 21, x - 7, y - 28, 2, P.arm);
+        R(x - 8, y - 30, 3, 2, P.skin);
+        line(x + 6, y - 15, x + 9, y - 20, 3, P.arm);
+        line(x + 9, y - 20, x + 6, y - 25, 2, P.arm);
+      } else if (pose === 'celebrate') {
+        line(x - 6, y - 16, x - 9, y - 26, 3, P.arm);
+        line(x - 9, y - 26, x - 8, y - 35, 2, P.arm);
+        R(x - 10, y - 38, 3, 3, P.skin);
+        line(x + 6, y - 16, x + 9, y - 26, 3, P.arm);
+        line(x + 9, y - 26, x + 8, y - 35, 2, P.arm);
+        R(x + 7, y - 38, 3, 3, P.skin);
+      } else {
+        line(x - 6, y - 15, x - 9, y - 21, 3, P.arm);
+        line(x - 9, y - 21, x - 7, y - 28, 2, P.arm);
+        R(x - 8, y - 30, 3, 2, P.skin);
+      }
+
+      // Cabeza
+      const hy = y - bob;
+      if (pose === 'wave') {
+        // Voltea a ver a quien visita
+        R(x - 4, hy - 28, 8, 9, P.skin);
+        R(x - 3, hy - 19, 6, 1, P.skin);
+        R(x - 5, hy - 32, 10, 5, P.hair);
+        R(x - 5, hy - 27, 1, 3, P.hair);
+        R(x + 4, hy - 27, 1, 3, P.hair);
+        R(x - 4, hy - 33, 2, 1, P.hair);
+        R(x, hy - 34, 2, 2, P.hair);
+        R(x - 4, hy - 27, 3, 1, P.hair);
+        R(x + 1, hy - 27, 2, 1, P.hair);
+        R(x - 4, hy - 25, 3, 1, P.frame);
+        R(x + 1, hy - 25, 3, 1, P.frame);
+        R(x - 4, hy - 23, 3, 1, P.frame);
+        R(x + 1, hy - 23, 3, 1, P.frame);
+        R(x - 1, hy - 25, 2, 1, P.frame);
+        R(x - 3, hy - 24, 1, 1, P.hair);
+        R(x + 2, hy - 24, 1, 1, P.hair);
+        R(x - 2, hy - 21, 4, 1, P.mouth);
+        const w = reduceMotion ? 0 : Math.floor(t / 220) % 2;
+        line(x + 6, y - 15, x + 10, y - 22, 3, P.arm);
+        line(x + 10, y - 22, x + 11 + w, y - 29, 2, P.arm);
+        R(x + 10 + w, y - 33, 3, 4, P.skin);
+        say(C.hello, x, y - 50);
+      } else {
+        R(x - 5, hy - 30, 10, 12, P.hair);
+        R(x - 4, hy - 31, 8, 1, P.hair);
+        R(x - 4, hy - 33, 2, 2, P.hair);
+        R(x, hy - 34, 2, 3, P.hair);
+        R(x + 3, hy - 32, 1, 1, P.hair);
+        R(x - 3, hy - 29, 5, 1, P.hairHi);
+        R(x - 6, hy - 24, 1, 3, P.skinDk);
+        R(x + 5, hy - 24, 1, 3, P.skinDk);
+        R(x - 5, hy - 25, 1, 1, P.frame);
+        R(x + 4, hy - 25, 1, 1, P.frame);
+        if (pose === 'think') {
+          R(x + 5, y - 27, 3, 3, P.skin);
+          const dots = reduceMotion ? 3 : Math.floor(t / 300) % 4;
+          bubble(x + 6, y - 48, 16, 9, x + 8);
+          for (let i = 0; i < dots; i++) R(x + 9 + i * 4, y - 44, 2, 2, P.ink);
+        }
+        if (pose === 'celebrate' && !reduceMotion) {
+          const f = Math.floor(t / 180) % 2;
+          const sp = f ? [[x - 13, y - 40], [x + 11, y - 41], [x, y - 42]] : [[x - 12, y - 36], [x + 12, y - 37], [x - 2, y - 40]];
+          sp.forEach(([sx, sy]) => R(sx, sy, 1, 1, '#ffd36b'));
+        }
+      }
+      drawChairBack();
+    };
+
+    // ---------- Gato ----------
+    const drawCat = () => {
+      const t = S.t;
+      const x = Math.round(cat.x);
+      const y = Math.round(cat.y);
+      const awake = t < cat.meowUntil;
+      R(x - 6, y - 1, 12, 2, 'rgba(0,0,0,0.22)');
+      if (cat.mode === 'sleep' && !awake) {
+        const b = !reduceMotion && Math.sin(t / 650) > 0 ? 1 : 0;
+        ellipse(x, y - 4, 6, 3 + b, P.cat);
+        R(x - 3, y - 7 - b, 1, 3, P.catDk);
+        R(x, y - 7 - b, 1, 4, P.catDk);
+        R(x + 3, y - 6 - b, 1, 3, P.catDk);
+        R(x + 3, y - 6, 5, 5, P.cat);
+        R(x + 3, y - 8, 2, 2, P.cat);
+        R(x + 6, y - 8, 2, 2, P.cat);
+        R(x + 4, y - 4, 1, 1, P.catDk);
+        R(x + 6, y - 4, 1, 1, P.catDk);
+        R(x - 7, y - 3, 3, 2, P.cat);
+        R(x - 6, y - 1, 8, 1, P.cat);
+        if (!reduceMotion) {
+          for (let i = 0; i < 2; i++) {
+            const ph = (t / 2200 + i * 0.5) % 1;
+            if (ph < 0.85) text('Z', x + 6 + ph * 6, y - 12 - ph * 12, `rgba(244,241,232,${(1 - ph).toFixed(2)})`);
+          }
+        }
+      } else if (cat.mode === 'walk') {
+        const s = cat.dir === 'left' ? -1 : 1;
+        const f = !reduceMotion ? Math.floor(cat.walkT / 120) % 2 : 0;
+        const M = (dx: number, dy: number, w: number, h: number, c: string) =>
+          s === 1 ? R(x + dx, y + dy, w, h, c) : R(x - dx - w, y + dy, w, h, c);
+        M(-5, -7, 10, 4, P.cat);
+        M(-3, -7, 1, 3, P.catDk);
+        M(0, -7, 1, 3, P.catDk);
+        M(-4, -3, 1, 2 + f, P.cat);
+        M(-2, -3, 1, 3 - f, P.cat);
+        M(2, -3, 1, 2 + f, P.cat);
+        M(4, -3, 1, 3 - f, P.cat);
+        M(-7, -10, 2, 4, P.cat);
+        M(4, -11, 5, 5, P.cat);
+        M(4, -12, 1, 1, P.cat);
+        M(7, -12, 1, 1, P.cat);
+        M(7, -9, 1, 1, P.ink);
+      } else {
+        // Sentado de frente
+        R(x - 4, y - 7, 8, 7, P.cat);
+        R(x - 2, y - 6, 4, 5, P.catLt);
+        R(x + 4, y - 3, 4, 2, P.cat);
+        R(x + 7, y - 6, 1, 3, P.cat);
+        R(x - 4, y - 13, 8, 6, P.cat);
+        R(x - 4, y - 15, 2, 2, P.cat);
+        R(x + 2, y - 15, 2, 2, P.cat);
+        R(x - 3, y - 14, 1, 1, '#f2a3a3');
+        R(x + 2, y - 14, 1, 1, '#f2a3a3');
+        const bl = Math.floor(t / 3000) % 4 === 0 && t % 3000 < 160;
+        R(x - 3, y - 11, 2, bl ? 1 : 2, '#7fd46a');
+        R(x + 1, y - 11, 2, bl ? 1 : 2, '#7fd46a');
+        if (!bl) {
+          R(x - 2, y - 11, 1, 2, P.ink);
+          R(x + 1, y - 11, 1, 2, P.ink);
+        }
+        R(x, y - 9, 1, 1, '#e58a8a');
+      }
+      if (awake) say(C.catSays, x, y - 26);
+      if (t < cat.heartsUntil && !reduceMotion) {
+        for (let i = 0; i < 3; i++) {
+          const ph = (t / 900 + i / 3) % 1;
+          text('♥', x - 4 + i * 4, y - 14 - ph * 12, `rgba(255,110,140,${(1 - ph).toFixed(2)})`);
+        }
+      }
+    };
+
+    // ---------- Pantalla del monitor ----------
     const drawScreen = () => {
       const p = data.projects[S.proj];
-      const x0 = 217;
-      const y0 = 59;
-      R(x0, y0, 50, 33, '#0f1226');
+      const x0 = 223;
+      const y0 = 29;
+      R(x0, y0, 50, 24, '#0f1226');
       R(x0, y0, 50, 6, '#1c2142');
-      const label = p.short.length > 10 ? p.short.slice(0, 10) : p.short;
+      const label = p.short.length > 9 ? p.short.slice(0, 9) : p.short;
       R(x0 + 1, y0 + 1, textW(label) + 4, 5, '#0f1226');
       text(label, x0 + 3, y0 + 1, '#9fb4ff');
       R(x0 + 44, y0 + 2, 1, 1, '#ff6b6b');
       R(x0 + 46, y0 + 2, 1, 1, '#ffcb6b');
       R(x0 + 48, y0 + 2, 1, 1, '#7fd4a0');
-      R(x0, y0 + 6, 4, 27, '#12162e');
+      R(x0, y0 + 6, 4, 18, '#12162e');
 
-      // Código
       const typed = Math.floor(S.typed);
+      const lens = S.code.map((l) => l.toks.length);
       let remaining = typed;
       let curLine = 0;
-      const lens = S.code.map((l) => l.toks.length);
       for (let i = 0; i < lens.length; i++) {
         if (remaining >= lens[i]) {
           remaining -= lens[i];
@@ -901,13 +1268,13 @@ const roomData = {
       }
       curLine = Math.min(curLine, S.code.length - 1);
       const panel = S.phase === 'build' || S.phase === 'deployed';
-      const visible = panel ? 3 : 6;
+      const visible = panel ? 2 : 5;
       const start = Math.max(0, curLine - (visible - 1));
       let count = 0;
       for (let i = 0; i < start; i++) count += lens[i];
-      let cursor: [number, number] | null = null;
+      let cursor: Pt | null = null;
       for (let li = start; li < Math.min(S.code.length, start + visible); li++) {
-        const ly = y0 + 8 + (li - start) * 4;
+        const ly = y0 + 8 + (li - start) * 3;
         R(x0 + 1, ly, 2, 1, '#2a3160');
         const ln = S.code[li];
         let lx = x0 + 6 + ln.indent * 3;
@@ -921,70 +1288,70 @@ const roomData = {
         if (li === curLine) cursor = [Math.min(lx, x0 + 48), ly];
         if (count >= typed && li >= curLine) break;
       }
+      const away = me.mode !== 'sit';
       if (cursor && !panel && Math.floor(S.t / 400) % 2 === 0) R(cursor[0], cursor[1] - 1, 1, 4, '#e8ecff');
-
       if (panel) {
-        R(x0, y0 + 20, 50, 13, '#080a18');
-        R(x0, y0 + 20, 50, 1, '#1c2142');
+        R(x0, y0 + 14, 50, 10, '#080a18');
+        R(x0, y0 + 14, 50, 1, '#1c2142');
         if (S.phase === 'build') {
-          text('> BUILD', x0 + 2, y0 + 22, '#9fb4ff');
+          text('> BUILD', x0 + 2, y0 + 15, '#9fb4ff');
           const pr = Math.min(1, S.phaseT / 1600);
-          R(x0 + 2, y0 + 28, 46, 3, '#1c2142');
-          R(x0 + 2, y0 + 28, Math.round(46 * pr), 3, '#4a7dff');
+          R(x0 + 2, y0 + 21, 46, 2, '#1c2142');
+          R(x0 + 2, y0 + 21, Math.round(46 * pr), 2, '#4a7dff');
         } else {
-          text('✓ DEPLOYED', x0 + 3, y0 + 22, '#5fe08a');
-          R(x0 + 2, y0 + 28, 46, 3, '#1f6b3d');
-          R(x0 + 2, y0 + 28, 46, 3, '#5fe08a');
+          text('✓ DEPLOYED', x0 + 3, y0 + 15, '#5fe08a');
+          R(x0 + 2, y0 + 21, 46, 2, '#5fe08a');
         }
+      } else if (away) {
+        R(x0 + 30, y0 + 18, 18, 5, '#1c2142');
+        text('AFK', x0 + 33, y0 + 18, '#ffcb6b');
       }
-      // reflejo
-      R(x0 + 40, y0 + 7, 1, 3, 'rgba(255,255,255,0.06)');
     };
 
-    const drawEmissive = () => {
+    // ---------- Luces ----------
+    const drawLights = () => {
       const t = S.t;
-      // Estrellas y luna (encima de la sombra)
       if (S.night) {
         stars.forEach((s) => {
           const on = reduceMotion || Math.sin(t / 700 + s.p) > -0.4;
-          if (on && !(s.x > 58 && s.x < 62) && !(s.y > 47 && s.y < 51)) R(s.x, s.y, 1, 1, '#f4f1d6');
+          if (on && s.x !== 61 && s.x !== 62 && s.y !== 29 && s.y !== 30) R(s.x, s.y, 1, 1, '#f4f1d6');
         });
-        disc(44, 31, 4, '#f4f1d6');
-        disc(46, 30, 3, '#222b62');
-        R(47, 30, 1, 1, '#1a2150');
+        disc(48, 21, 3, '#f4f1d6');
+        disc(50, 20, 2, '#1a2150');
       }
       drawScreen();
 
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
-      // Resplandor del monitor (discos escalonados = luz "pixel")
+      // Haz de la ventana en el piso (+ polvo flotando de día)
+      ctx.fillStyle = S.night ? 'rgba(140,170,255,0.05)' : 'rgba(255,236,190,0.11)';
+      ctx.beginPath();
+      ctx.moveTo(39, 62);
+      ctx.lineTo(85, 62);
+      ctx.lineTo(128, 150);
+      ctx.lineTo(82, 150);
+      ctx.closePath();
+      ctx.fill();
+      if (!S.night && !reduceMotion) {
+        motes.forEach((m) => {
+          const v = (m.v + t / (9000 / m.s)) % 1;
+          const u = (m.u + Math.sin(t / 1500 + m.p) * 0.05 + 1) % 1;
+          const yy = 64 + v * 84;
+          const xx = 39 + (yy - 62) * 0.49 + u * 46;
+          R(xx, yy, 1, 1, 'rgba(255,245,210,0.55)');
+        });
+      }
+      // Resplandor del monitor
       const glow = S.night ? 0.045 : 0.012;
-      [34, 26, 18].forEach((r) => disc(242, 76, r, `rgba(70,110,255,${glow})`));
-      if (S.night) R(187, 64, 14, 15, 'rgba(70,120,255,0.10)');
+      [34, 26, 18].forEach((r) => disc(248, 50, r, `rgba(70,110,255,${glow})`));
+      if (S.night && me.mode === 'sit') R(me.x - 6, me.y - 32, 12, 12, 'rgba(70,120,255,0.08)');
       // Lámpara
       if (S.lamp) {
-        R(289, 74, 11, 1, 'rgba(255,240,190,0.9)');
-        ctx.fillStyle = `rgba(255,205,130,${S.night ? 0.13 : 0.05})`;
-        ctx.beginPath();
-        ctx.moveTo(289, 74);
-        ctx.lineTo(300, 74);
-        ctx.lineTo(304, 104);
-        ctx.lineTo(258, 104);
-        ctx.closePath();
-        ctx.fill();
-        R(254, 103, 56, 2, `rgba(255,205,130,${S.night ? 0.18 : 0.06})`);
-        if (S.night) [40, 30, 20].forEach((r) => disc(292, 92, r, 'rgba(255,190,120,0.035)'));
-      }
-      // Sol en el piso (día)
-      if (!S.night) {
-        ctx.fillStyle = 'rgba(255,236,190,0.09)';
-        ctx.beginPath();
-        ctx.moveTo(34, 135);
-        ctx.lineTo(90, 135);
-        ctx.lineTo(126, 170);
-        ctx.lineTo(62, 170);
-        ctx.closePath();
-        ctx.fill();
+        R(277, 38, 11, 1, 'rgba(255,240,190,0.9)');
+        const a = S.night ? 0.07 : 0.025;
+        ellipse(276, 64, 22, 10, `rgba(255,205,130,${a})`);
+        ellipse(276, 64, 14, 6, `rgba(255,205,130,${a})`);
+        if (S.night) [48, 34, 22].forEach((r) => disc(276, 66, r, 'rgba(255,190,120,0.03)'));
       }
       ctx.restore();
 
@@ -994,46 +1361,44 @@ const roomData = {
         ctx.save();
         ctx.globalCompositeOperation = 'lighter';
         const a = S.night ? 0.28 : 0.14;
-        [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dx, dy]) => text('</>', 284 + dx, 25 + dy, `rgba(90,130,255,${a})`, 2));
+        [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dx, dy]) => text('</>', 322 + dx, 10 + dy, `rgba(90,130,255,${a})`, 2));
         ctx.restore();
-        text('</>', 284, 25, '#8fa6ff', 2);
+        text('</>', 322, 10, '#8fa6ff', 2);
       }
 
       // Teclado RGB
       const hue = reduceMotion ? 225 : Math.floor(t / 15) % 360;
-      R(208, 104, 26, 1, `hsla(${hue},85%,62%,0.9)`);
+      R(228, 70, 34, 1, `hsla(${hue},85%,62%,0.9)`);
 
-      // LEDs homelab
-      for (let i = 0; i < 4; i++) {
-        const on1 = reduceMotion || (Math.floor(t / 170) * 7 + i * 13) % 5 !== 0;
-        const on2 = reduceMotion || (Math.floor(t / 230) * 5 + i * 11) % 4 !== 0;
-        R(277 + i * 2, 120, 1, 1, on1 ? '#5fe08a' : '#1c3a28');
-        R(277 + i * 2, 133, 1, 1, on2 ? (i === 3 ? '#6d8bff' : '#5fe08a') : '#1c2a3a');
-      }
+      // LEDs del rack
+      [31, 42, 53].forEach((yy, row) => {
+        for (let i = 0; i < 4; i++) {
+          const on = reduceMotion || (Math.floor(t / (150 + row * 60)) * (5 + row * 2) + i * 13) % 5 !== 0;
+          const col = me.anim === 'check' && me.mode === 'act' ? '#6d8bff' : i === 3 ? '#6d8bff' : '#5fe08a';
+          R(322 + i * 2, yy + 3, 1, 1, on ? col : '#1c3a28');
+        }
+      });
+      // Cafetera
+      R(354, 92, 1, 1, me.anim === 'coffee' && me.mode === 'act' ? '#ff6b6b' : '#5fe08a');
 
       // Pantalla del teléfono
       const vib = t < S.notifUntil && t > S.notifUntil - 2000 && Math.floor(t / 60) % 2 === 0 ? 1 : 0;
-      const px = 281 + vib;
+      const px = 206 + vib;
       if (t < S.notifUntil) {
-        R(px, 88, 5, 11, '#1a2340');
-        R(px, 90, 5, 3, '#25d366');
-        R(px + 1, 94, 3, 1, '#e8e8f0');
-        R(px + 1, 96, 2, 1, '#8a93b8');
-        if (Math.floor(t / 250) % 2 === 0) text('!', px + 1, 80, '#ffd36b');
+        R(px, 67, 5, 9, '#1a2340');
+        R(px, 68, 5, 3, '#25d366');
+        R(px + 1, 72, 3, 1, '#e8e8f0');
+        R(px + 1, 74, 2, 1, '#8a93b8');
+        if (Math.floor(t / 250) % 2 === 0) text('!', px + 1, 58, '#ffd36b');
       } else {
-        R(px, 88, 5, 11, '#141a30');
-        R(px + 1, 90, 3, 1, '#2a3360');
+        R(px, 67, 5, 9, '#141a30');
       }
 
-      // Vapor del café
+      // Vapor de la taza
       if (!reduceMotion) {
-        const burst = t < S.steamUntil;
-        const n = burst ? 6 : 3;
-        for (let i = 0; i < n; i++) {
-          const ph = (t / (burst ? 500 : 1000) + i / n) % 1;
-          const y = 93 - ph * (burst ? 16 : 11);
-          const x = 265 + (i % 3) * 2 + Math.round(Math.sin(ph * 6 + i));
-          R(x, y, 1, 2, `rgba(235,235,245,${(0.55 * (1 - ph)).toFixed(2)})`);
+        for (let i = 0; i < 3; i++) {
+          const ph = (t / 1000 + i / 3) % 1;
+          R(207 + i + Math.round(Math.sin(ph * 6 + i)), 55 - ph * 10, 1, 2, `rgba(235,235,245,${(0.5 * (1 - ph)).toFixed(2)})`);
         }
       }
     };
@@ -1042,16 +1407,14 @@ const roomData = {
     const drawPointer = () => {
       let id = S.hover;
       if (!id && !S.interacted && Math.floor(S.t / 5000) % 2 === 0) id = 'monitor';
-      if (!id) return;
+      if (!id || id === 'me') return;
       const hs = hotspotRects[id];
       if (!hs) return;
       const bob = reduceMotion ? 0 : Math.round(Math.sin(S.t / 160) * 1.5);
       const cx = Math.round(hs.x + hs.w / 2);
-      let y = hs.y - 8 + bob;
-      if (id === 'me') return;
-      if (id === 'window' || id === 'neon' || id === 'poster') y = Math.max(2, hs.y - 9 + bob);
-      R(cx - 3, y, 7, 1, P.ink);
+      const y = Math.max(3, hs.y - 7 + bob);
       R(cx - 4, y - 1, 9, 1, P.ink);
+      R(cx - 3, y, 7, 1, P.ink);
       R(cx - 3, y - 1, 7, 1, '#fff8dc');
       R(cx - 2, y, 5, 1, '#fff8dc');
       R(cx - 1, y + 1, 3, 1, '#fff8dc');
@@ -1063,12 +1426,37 @@ const roomData = {
       R(cx, y + 3, 1, 1, P.ink);
     };
 
+    // Viñeta suave en las esquinas
+    const drawVignette = () => {
+      const a = 0.05 + S.dark * 0.12;
+      for (let i = 0; i < 4; i++) {
+        const d = 10 + i * 10;
+        R(0, 0, W, 2 + i * 2, `rgba(5,6,18,${a})`);
+        R(0, H - 2 - i * 2, W, 2 + i * 2, `rgba(5,6,18,${a})`);
+        R(0, 0, d / 5 + i * 2, H, `rgba(5,6,18,${a})`);
+        R(W - d / 5 - i * 2, 0, d / 5 + i * 2, H, `rgba(5,6,18,${a})`);
+      }
+    };
+
     const draw = () => {
       ctx.imageSmoothingEnabled = false;
       ctx.clearRect(0, 0, W, H);
-      drawRoom();
+      drawShell();
+      drawWallDecor();
+      drawFurniture();
+      const sitting = me.mode === 'sit';
+      if (!sitting) drawChairBack();
+      // Orden por profundidad (y) entre personaje y gato
+      if (cat.y <= me.y) {
+        drawCat();
+        drawMe();
+      } else {
+        drawMe();
+        drawCat();
+      }
       if (S.dark > 0.005) R(0, 0, W, H, `rgba(8,10,32,${S.dark.toFixed(3)})`);
-      drawEmissive();
+      drawLights();
+      drawVignette();
       drawPointer();
     };
 
@@ -1091,16 +1479,16 @@ const roomData = {
     // ---------- Hotspots ----------
     const hotspotRects: Record<string, { x: number; y: number; w: number; h: number }> = {};
     const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('.hotspot'));
+    const btnById: Record<string, HTMLButtonElement> = {};
     buttons.forEach((b) => {
       const id = b.dataset.hotspot!;
+      btnById[id] = b;
       hotspotRects[id] = { x: +b.dataset.x!, y: +b.dataset.y!, w: +b.dataset.w!, h: +b.dataset.h! };
       const enter = () => {
         S.hover = id;
-        if (reduceMotion) draw();
       };
       const leave = () => {
         if (S.hover === id) S.hover = null;
-        if (reduceMotion) draw();
       };
       b.addEventListener('pointerenter', enter);
       b.addEventListener('pointerleave', leave);
@@ -1108,62 +1496,84 @@ const roomData = {
       b.addEventListener('blur', leave);
       b.addEventListener('click', () => {
         S.interacted = true;
+        S.holdUntil = S.t + 12000;
         lastTrigger = b;
-        handle(id, b);
-        if (reduceMotion) draw();
+        handle(id);
       });
     });
-    const btn = (id: string) => buttons.find((b) => b.dataset.hotspot === id);
+    const lastPlaced: Record<string, string> = {};
+    function placeBtn(id: string, x: number, y: number, w: number, h: number) {
+      const b = btnById[id];
+      if (!b) return;
+      hotspotRects[id] = { x, y, w, h };
+      const css = `left:${((x / W) * 100).toFixed(2)}%;top:${((y / H) * 100).toFixed(2)}%;width:${((w / W) * 100).toFixed(2)}%;height:${((h / H) * 100).toFixed(2)}%`;
+      if (lastPlaced[id] !== css) {
+        b.style.cssText = css;
+        lastPlaced[id] = css;
+      }
+    }
     const syncToggles = () => {
-      btn('window')?.setAttribute('aria-pressed', String(S.night));
-      btn('lamp')?.setAttribute('aria-pressed', String(S.lamp));
+      btnById.window?.setAttribute('aria-pressed', String(S.night));
+      btnById.lamp?.setAttribute('aria-pressed', String(S.lamp));
     };
     syncToggles();
 
     const status = root.querySelector<HTMLElement>('.room-status')!;
     let statusTimer = 0;
-    const say = (msg: string) => {
+    const announce = (msg: string) => {
       status.textContent = msg;
       window.clearTimeout(statusTimer);
       statusTimer = window.setTimeout(() => (status.textContent = ''), 3200);
     };
 
-    const handle = (id: string, b: HTMLButtonElement) => {
+    const handle = (id: string) => {
       switch (id) {
         case 'window':
           S.night = !S.night;
           if (S.night) S.lamp = true;
           syncToggles();
-          say(S.night ? C.nightOn : C.dayOn);
+          announce(S.night ? C.nightOn : C.dayOn);
+          goTo('window');
           break;
         case 'lamp':
           S.lamp = !S.lamp;
           syncToggles();
-          say(S.lamp ? C.lampOn : C.lampOff);
+          announce(S.lamp ? C.lampOn : C.lampOff);
           break;
         case 'cat':
-          S.catUntil = S.t + 2600;
-          say(C.catMsg);
+          cat.meowUntil = S.t + 2200;
+          announce(C.catMsg);
+          goTo('cat');
           break;
         case 'plant':
           S.plantUntil = S.t + 900;
-          say(C.plantMsg);
+          announce(C.plantMsg);
+          goTo('plant');
           break;
-        case 'mug':
-          S.cups++;
-          S.steamUntil = S.t + 1600;
-          openDialog('mug');
+        case 'coffee':
+          goTo('coffee');
+          openDialog('coffee');
           break;
         case 'phone':
           S.notifUntil = 0;
+          goTo('desk');
           openDialog('phone');
+          break;
+        case 'monitor':
+        case 'neon':
+          goTo('desk');
+          openDialog(id);
+          break;
+        case 'bookshelf':
+        case 'poster':
+        case 'homelab':
+          goTo(id);
+          openDialog(id);
           break;
         case 'me':
           S.waveUntil = S.t + 2500;
           openDialog('me');
           break;
-        default:
-          openDialog(id);
       }
     };
 
@@ -1203,8 +1613,8 @@ const roomData = {
           return { eyebrow: 'docker ps', title: C.srvTitle, body: C.srvBody, actions: [{ label: C.srvCta, href: L.services }] };
         case 'phone':
           return { eyebrow: '● online', title: C.phoneTitle, body: C.phoneBody, actions: [{ label: C.phoneCta, href: L.contact }] };
-        case 'mug':
-          return { eyebrow: '☕', title: C.mugTitle, body: C.mugBody.replace('{n}', String(S.cups)), actions: [{ label: C.mugCta, href: L.contact }] };
+        case 'coffee':
+          return { eyebrow: '☕', title: C.mugTitle, body: C.mugBody.replace('{n}', String(S.cups + 1)), actions: [{ label: C.mugCta, href: L.contact }] };
         case 'me':
         default:
           return {
@@ -1219,7 +1629,7 @@ const roomData = {
       }
     };
 
-    const openDialog = (id: string, focus = true) => {
+    function openDialog(id: string, focus = true) {
       const c = content(id);
       currentId = id;
       dEyebrow.textContent = c.eyebrow;
@@ -1246,7 +1656,6 @@ const roomData = {
       } else {
         let n = 0;
         dBody.textContent = '';
-        dBody.setAttribute('aria-label', c.body);
         typeTimer = window.setInterval(() => {
           n += 2;
           dBody.textContent = c.body.slice(0, n);
@@ -1254,7 +1663,7 @@ const roomData = {
         }, 16);
       }
       if (focus) (dActions.firstElementChild as HTMLElement | null)?.focus({ preventScroll: true });
-    };
+    }
 
     const closeDialog = (restore = true) => {
       window.clearInterval(typeTimer);
@@ -1277,8 +1686,8 @@ const roomData = {
     let last = performance.now();
     let acc = 0;
     let visible = true;
-    // Con movimiento reducido se dibuja a 4 fps y sin animaciones de personaje.
-    const FRAME = reduceMotion ? 250 : 1000 / 20;
+    // Con movimiento reducido se dibuja a 4 fps y sin desplazamientos.
+    const FRAME = reduceMotion ? 250 : 1000 / 30;
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
       const dt = Math.min(100, now - last);
@@ -1304,6 +1713,7 @@ const roomData = {
     }).observe(canvas);
     document.addEventListener('visibilitychange', () => (document.hidden || !visible ? stop() : start()));
 
+    update(0);
     resize();
     start();
   }
@@ -1386,7 +1796,8 @@ const roomData = {
   }
   .hotspot[data-hotspot='neon'] .hotspot-tip,
   .hotspot[data-hotspot='lamp'] .hotspot-tip,
-  .hotspot[data-hotspot='homelab'] .hotspot-tip {
+  .hotspot[data-hotspot='homelab'] .hotspot-tip,
+  .hotspot[data-hotspot='coffee'] .hotspot-tip {
     left: auto;
     right: 0;
     transform: translate(0, 4px);
@@ -1404,6 +1815,7 @@ const roomData = {
   .hotspot[data-hotspot='neon']:hover .hotspot-tip,
   .hotspot[data-hotspot='lamp']:hover .hotspot-tip,
   .hotspot[data-hotspot='homelab']:hover .hotspot-tip,
+  .hotspot[data-hotspot='coffee']:hover .hotspot-tip,
   .hotspot[data-hotspot='plant']:hover .hotspot-tip,
   .hotspot[data-hotspot='neon']:focus-visible .hotspot-tip,
   .hotspot[data-hotspot='lamp']:focus-visible .hotspot-tip,

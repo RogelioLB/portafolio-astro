@@ -103,7 +103,11 @@ const lede =
     box-shadow: 0 0 0 3px oklch(62% 0.15 152 / 0.18);
   }
 
+  /* La escena se sale del ancho de lectura para que el cuarto se vea grande. */
   .hero-demo {
+    width: min(1080px, calc(100vw - 2 * var(--space-lg)));
+    margin-left: 50%;
+    transform: translateX(-50%);
     margin-bottom: var(--space-2xl);
   }
 
