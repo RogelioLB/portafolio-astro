@@ -1,7 +1,8 @@
 ---
-// Hero.astro — H2 Split diptych: headline + lede left, live "API response" code card right.
-// Cobalt signature move 4 (code as hero), rebuilt without fake window chrome (gate 47).
+// Hero.astro — Escena pixel art interactiva (Rogelio trabajando en su cuarto) como pieza
+// principal, con identidad arriba y titular + CTAs debajo.
 import { useTranslations, type Lang } from '../i18n/utils';
+import PixelRoom from './PixelRoom.astro';
 
 interface Props {
   lang?: Lang;
@@ -21,22 +22,11 @@ const lede =
       <img src="/avatar.png" alt="Rogelio López" class="avatar" width="44" height="44" />
       <span class="mono-label identity-label">Rogelio López · {t('hero.eyebrow')}</span>
     </div>
+    <span class="status-pill mono-label"><span class="status-dot" aria-hidden="true"></span>{lang === 'en' ? 'Available for hire' : 'Disponible para proyectos'}</span>
+  </div>
 
-    <div class="hero-demo">
-      <div class="code-card">
-        <div class="code-card-head">
-          <span class="code-method">GET /api/rogelio</span>
-          <span class="code-status">200 OK</span>
-        </div>
-        <pre class="code-body"><code><span class="tok-punct">{"{"}</span>
-  <span class="tok-key">"role"</span><span class="tok-punct">:</span> <span class="tok-string">"Full-Stack Engineer"</span><span class="tok-punct">,</span>
-  <span class="tok-key">"location"</span><span class="tok-punct">:</span> <span class="tok-string">"{t('hero.code.location')}"</span><span class="tok-punct">,</span>
-  <span class="tok-key">"experience_years"</span><span class="tok-punct">:</span> <span class="tok-num">4</span><span class="tok-punct">,</span>
-  <span class="tok-key">"stack"</span><span class="tok-punct">:</span> <span class="tok-punct">[</span><span class="tok-string">"TypeScript"</span><span class="tok-punct">,</span> <span class="tok-string">"Node.js"</span><span class="tok-punct">,</span> <span class="tok-string">"Next.js"</span><span class="tok-punct">,</span> <span class="tok-string">"Docker"</span><span class="tok-punct">]</span><span class="tok-punct">,</span>
-  <span class="tok-key">"status"</span><span class="tok-punct">:</span> <span class="tok-string tok-accent">"available_for_hire"</span>
-<span class="tok-punct">{"}"}</span></code></pre>
-      </div>
-    </div>
+  <div class="hero-demo">
+    <PixelRoom lang={lang} />
   </div>
 
   <div class="hero-copy">
@@ -63,25 +53,23 @@ const lede =
   .hero {
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: var(--space-3xl) var(--space-lg) var(--space-2xl);
+    padding: var(--space-2xl) var(--space-lg) var(--space-2xl);
   }
 
   .hero-top {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    gap: var(--space-xl);
+    gap: var(--space-md);
     flex-wrap: wrap;
-    margin-bottom: var(--space-2xl);
+    margin-bottom: var(--space-lg);
   }
 
   .identity {
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    padding-top: var(--space-2xs);
     min-width: 0;
-    flex: 1 1 16rem;
   }
 
   .avatar {
@@ -95,12 +83,28 @@ const lede =
 
   .identity-label {
     color: var(--color-ink-muted);
-    max-width: 16rem;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-pill);
+    color: var(--color-ink-2);
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-success);
+    box-shadow: 0 0 0 3px oklch(62% 0.15 152 / 0.18);
   }
 
   .hero-demo {
-    flex-shrink: 0;
-    width: min(100%, 28rem);
+    margin-bottom: var(--space-2xl);
   }
 
   .hero-copy h1 {
@@ -145,52 +149,6 @@ const lede =
     background: var(--color-paper-2);
   }
 
-  /* Code card — typographic frame, no fake window chrome */
-  .code-card {
-    background: var(--color-graphite);
-    border: 1px solid var(--color-rule-2);
-    border-radius: var(--radius-card);
-    box-shadow: 0 1px 2px oklch(24% 0.02 258 / 0.05);
-    overflow: hidden;
-  }
-
-  .code-card-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-sm) var(--space-md);
-    border-bottom: 1px solid var(--color-rule-2);
-  }
-
-  .code-method {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    color: var(--color-ink-on-dark-muted);
-  }
-
-  .code-status {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    color: var(--color-accent);
-  }
-
-  .code-body {
-    padding: var(--space-md);
-    font-family: var(--font-mono);
-    font-size: 0.74rem;
-    line-height: 1.7;
-    overflow-x: auto;
-    color: var(--color-ink-on-dark-muted);
-  }
-
-  .tok-key { color: var(--color-ink-on-dark); }
-  .tok-string { color: oklch(78% 0.12 152); }
-  .tok-num { color: oklch(78% 0.14 70); }
-  .tok-punct { color: var(--color-ink-on-dark-muted); opacity: 0.6; }
-  .tok-accent { color: var(--color-accent); }
-
   @media (max-width: 60rem) {
     .hero {
       padding-top: var(--space-2xl);
@@ -201,9 +159,4 @@ const lede =
     }
   }
 
-  @media (max-width: 26rem) {
-    .code-body {
-      font-size: 0.72rem;
-    }
-  }
 </style>

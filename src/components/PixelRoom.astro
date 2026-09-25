@@ -1,0 +1,1594 @@
+---
+// PixelRoom.astro — Escena pixel art 2D interactiva: Rogelio programando en su cuarto.
+// Todo se dibuja por código en un <canvas> de 320×180 (sin sprites externos) y se escala
+// con image-rendering: pixelated. Los objetos clicables son <button> reales superpuestos,
+// así la escena es accesible con teclado y lectores de pantalla.
+import { projects } from '../data/projects';
+import { projectPath, homePath, type Lang } from '../i18n/utils';
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = 'es' } = Astro.props;
+const home = homePath(lang);
+
+const copy = {
+  es: {
+    sr: 'Ilustración pixel art animada: Rogelio programando en la computadora de su cuarto. Los objetos del cuarto son botones que llevan a distintas secciones del portafolio.',
+    hint: 'Haz clic en los objetos del cuarto',
+    close: 'Cerrar',
+    workingOn: 'Trabajando en…',
+    viewCase: 'Ver caso completo →',
+    next: 'Siguiente ▶',
+    nightOn: 'Modo noche',
+    dayOn: 'Modo día',
+    lampOn: 'Lámpara encendida',
+    lampOff: 'Lámpara apagada',
+    catSays: 'MIAU',
+    hello: 'HOLA!',
+    projectsTitle: 'Proyectos',
+    projectsBody: `${projects.length} proyectos reales: plataformas SaaS, librerías open source, una app móvil con IA y una migración de e-commerce.`,
+    projectsCta: 'Ver proyectos ↓',
+    aboutTitle: 'Sobre mí',
+    aboutBody: 'Estudié Ingeniería en Software en la Universidad Autónoma de Occidente y llevo más de 4 años programando: front-end, back-end, DevOps e integraciones.',
+    aboutCta: 'Leer más ↓',
+    expTitle: 'Experiencia',
+    expBody: 'Freelance full-stack para clientes en México y Chile desde 2023; antes, desarrollo en TORKE (2022 – 2025). Mi regla: si no llega a producción, no cuenta.',
+    expCta: 'Ver trayectoria ↓',
+    srvTitle: 'Servicios',
+    srvBody: 'Aquí viven mis contenedores: Linux, Docker y despliegues en VPS. Llevo tu proyecto desde la idea hasta producción.',
+    srvCta: 'Ver servicios ↓',
+    phoneTitle: '1 mensaje nuevo',
+    phoneBody: '¿Tienes un proyecto en mente? Estoy disponible para empleo, freelance o consultoría. Escríbeme y te respondo pronto.',
+    phoneCta: 'Contáctame →',
+    mugTitle: 'Café',
+    mugBody: 'Combustible oficial de cada deploy. Tazas de hoy: {n}.',
+    mugCta: '¿Un café virtual? Hablemos →',
+    meTitle: '¡Hola! Soy Rogelio',
+    meBody: 'Ingeniero de software full-stack en Sinaloa, México. Explora mi cuarto: cada objeto te lleva a una parte de mi trabajo.',
+    meCta1: 'Contáctame',
+    meCta2: 'Ver proyectos',
+    plantMsg: 'La planta se sacude. Se riega con cada commit.',
+    catMsg: 'El gato despertó… y se volvió a dormir.',
+  },
+  en: {
+    sr: 'Animated pixel art illustration: Rogelio coding at the computer in his room. Objects in the room are buttons that lead to different sections of the portfolio.',
+    hint: 'Click objects in the room',
+    close: 'Close',
+    workingOn: 'Working on…',
+    viewCase: 'Read the full case →',
+    next: 'Next ▶',
+    nightOn: 'Night mode',
+    dayOn: 'Day mode',
+    lampOn: 'Lamp on',
+    lampOff: 'Lamp off',
+    catSays: 'MEOW',
+    hello: 'HI!',
+    projectsTitle: 'Projects',
+    projectsBody: `${projects.length} real projects: SaaS platforms, open-source libraries, an AI mobile app, and an e-commerce migration.`,
+    projectsCta: 'View projects ↓',
+    aboutTitle: 'About me',
+    aboutBody: 'I studied Software Engineering at Universidad Autónoma de Occidente and have 4+ years of coding across front-end, back-end, DevOps, and integrations.',
+    aboutCta: 'Read more ↓',
+    expTitle: 'Experience',
+    expBody: 'Freelance full-stack work for clients in Mexico and Chile since 2023; before that, development at TORKE (2022 – 2025). My rule: if it doesn’t reach production, it doesn’t count.',
+    expCta: 'See track record ↓',
+    srvTitle: 'Services',
+    srvBody: 'This is where my containers live: Linux, Docker, and VPS deployments. I take your project from idea to production.',
+    srvCta: 'View services ↓',
+    phoneTitle: '1 new message',
+    phoneBody: 'Have a project in mind? I’m available for full-time roles, freelance, or consulting. Send me a message and I’ll reply soon.',
+    phoneCta: 'Contact me →',
+    mugTitle: 'Coffee',
+    mugBody: 'Official fuel for every deploy. Cups today: {n}.',
+    mugCta: 'Virtual coffee? Let’s talk →',
+    meTitle: 'Hi! I’m Rogelio',
+    meBody: 'Full-stack software engineer based in Sinaloa, Mexico. Explore my room: every object leads to a part of my work.',
+    meCta1: 'Contact me',
+    meCta2: 'View projects',
+    plantMsg: 'The plant wiggles. It gets watered with every commit.',
+    catMsg: 'The cat woke up… and went back to sleep.',
+  },
+}[lang];
+
+const labels = {
+  es: {
+    me: ['¡Hola!', 'Rogelio: saludar'],
+    monitor: ['Monitor', 'Monitor: ver en qué proyecto estoy trabajando'],
+    neon: ['Proyectos', 'Letrero de neón: ver todos los proyectos'],
+    bookshelf: ['Sobre mí', 'Librero: sobre mí'],
+    poster: ['Experiencia', 'Póster: experiencia profesional'],
+    homelab: ['Servicios', 'Servidor: servicios'],
+    phone: ['Contacto', 'Teléfono: contacto'],
+    mug: ['Café', 'Taza de café'],
+    lamp: ['Lámpara', 'Lámpara: encender o apagar'],
+    window: ['Día / noche', 'Ventana: cambiar entre día y noche'],
+    cat: ['Gato', 'Gato dormido: despertarlo'],
+    plant: ['Planta', 'Planta'],
+  },
+  en: {
+    me: ['Hi!', 'Rogelio: say hi'],
+    monitor: ['Monitor', 'Monitor: see which project I’m working on'],
+    neon: ['Projects', 'Neon sign: view all projects'],
+    bookshelf: ['About me', 'Bookshelf: about me'],
+    poster: ['Experience', 'Poster: professional experience'],
+    homelab: ['Services', 'Server: services'],
+    phone: ['Contact', 'Phone: contact'],
+    mug: ['Coffee', 'Coffee mug'],
+    lamp: ['Lamp', 'Lamp: toggle on or off'],
+    window: ['Day / night', 'Window: toggle day and night'],
+    cat: ['Cat', 'Sleeping cat: wake it up'],
+    plant: ['Plant', 'Plant'],
+  },
+}[lang];
+
+// Zonas clicables en coordenadas nativas del canvas (320×180). El orden importa: los
+// últimos quedan encima (el gato está sobre la ventana).
+const hotspots: { id: keyof typeof labels; x: number; y: number; w: number; h: number; toggle?: boolean }[] = [
+  { id: 'window', x: 30, y: 20, w: 62, h: 44, toggle: true },
+  { id: 'cat', x: 32, y: 62, w: 30, h: 20 },
+  { id: 'plant', x: 2, y: 84, w: 24, h: 54 },
+  { id: 'bookshelf', x: 106, y: 44, w: 44, h: 98 },
+  { id: 'poster', x: 154, y: 20, w: 30, h: 40 },
+  { id: 'me', x: 164, y: 52, w: 44, h: 88 },
+  { id: 'monitor', x: 212, y: 54, w: 60, h: 44 },
+  { id: 'neon', x: 278, y: 20, w: 36, h: 22 },
+  { id: 'mug', x: 261, y: 89, w: 14, h: 16 },
+  { id: 'phone', x: 277, y: 85, w: 12, h: 20 },
+  { id: 'lamp', x: 290, y: 62, w: 24, h: 43, toggle: true },
+  { id: 'homelab', x: 271, y: 113, w: 34, h: 30 },
+];
+
+const pct = (v: number, total: number) => `${((v / total) * 100).toFixed(3)}%`;
+
+const roomData = {
+  lang,
+  copy,
+  links: {
+    projects: `${home}#proyectos`,
+    about: `${home}#sobre-mi`,
+    experience: `${home}#experiencia`,
+    services: `${home}#servicios`,
+    contact: `${home}#contacto`,
+  },
+  projects: projects.map((p) => ({
+    slug: p.slug,
+    name: p.name,
+    short: ({ 'nexo-laboral': 'NEXO', palettesnap: 'PALETTE', 'node-yt-converter': 'NODE-YT', alfri: 'ALFRI' } as Record<string, string>)[p.slug] ?? p.name,
+    tag: p.tag[lang],
+    summary: p.summary[lang],
+    href: projectPath(lang, p.slug),
+    tech: p.tech,
+  })),
+};
+---
+
+<div class="room" data-room>
+  <p class="sr-only">{copy.sr}</p>
+  <div class="room-stage">
+    <div class="room-screen">
+    <canvas class="room-canvas" width="320" height="180" aria-hidden="true"></canvas>
+    <div class="room-hotspots">
+      {hotspots.map((h) => (
+        <button
+          type="button"
+          class="hotspot"
+          data-hotspot={h.id}
+          data-x={h.x}
+          data-y={h.y}
+          data-w={h.w}
+          data-h={h.h}
+          aria-label={labels[h.id][1]}
+          aria-pressed={h.toggle ? 'false' : undefined}
+          style={`left:${pct(h.x, 320)};top:${pct(h.y, 180)};width:${pct(h.w, 320)};height:${pct(h.h, 180)}`}
+        >
+          <span class="hotspot-tip" aria-hidden="true">{labels[h.id][0]}</span>
+        </button>
+      ))}
+    </div>
+    </div>
+
+    <div class="room-dialog" role="dialog" aria-modal="false" aria-labelledby="room-dialog-title" hidden>
+      <button type="button" class="room-dialog-close" aria-label={copy.close}>×</button>
+      <span class="room-dialog-eyebrow"></span>
+      <p class="room-dialog-title" id="room-dialog-title"></p>
+      <p class="room-dialog-body"></p>
+      <div class="room-dialog-actions"></div>
+    </div>
+  </div>
+
+  <div class="room-footer">
+    <span class="room-hint"><span class="room-hint-dot" aria-hidden="true"></span>{copy.hint}</span>
+    <span class="room-status" aria-live="polite"></span>
+  </div>
+</div>
+
+<script type="application/json" id="room-data" is:inline set:html={JSON.stringify(roomData)} />
+
+<script>
+  type Proj = { slug: string; name: string; short: string; tag: string; summary: string; href: string; tech: string[] };
+  type RoomData = {
+    lang: string;
+    copy: Record<string, string>;
+    links: Record<'projects' | 'about' | 'experience' | 'services' | 'contact', string>;
+    projects: Proj[];
+  };
+  type Action = { label: string; href?: string; run?: () => void };
+
+  const root = document.querySelector<HTMLElement>('[data-room]');
+  const dataEl = document.getElementById('room-data');
+  if (root && dataEl) initRoom(root, JSON.parse(dataEl.textContent || '{}') as RoomData);
+
+  function initRoom(root: HTMLElement, data: RoomData) {
+    const W = 320;
+    const H = 180;
+    const canvas = root.querySelector<HTMLCanvasElement>('.room-canvas')!;
+    const ctx = canvas.getContext('2d')!;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const C = data.copy;
+
+    // ---------- Paleta ----------
+    const P = {
+      wall: '#3b3f6e', wallStripe: '#373a67', wallTop: '#2f325c', base: '#2a2c4f', baseHi: '#4a4f86',
+      floor: '#6b4630', floorLine: '#5a3a28', floorHi: '#7d5539',
+      wood: '#8a5a3a', woodHi: '#a56f49', woodDk: '#5e3c27', woodDk2: '#4a3020',
+      cream: '#e8e3d6', creamDk: '#c9c2b0', ink: '#15172a',
+      cobalt: '#4a63d8', cobaltDk: '#3a4fb3', cobaltDk2: '#2a3f8f', cobaltHi: '#6d8bff',
+      skin: '#c98b62', skinDk: '#a86c4a', hair: '#1b1a24', hairHi: '#3a3850', mouth: '#8a4f35',
+      hood: '#2a2d44', hoodHi: '#383c5a', hoodDk: '#1f2236', armNear: '#343858',
+      jeans: '#2e3f6e', jeansDk: '#243259', shoe: '#e8e8f0', sole: '#b8b8c8',
+      chair: '#1d1f2e', chairHi: '#2c2f45', metal: '#555a70',
+      cat: '#e0893a', catDk: '#b86a2a', catLt: '#f4e6d0',
+      leaf1: '#2f7a43', leaf2: '#3f9a55', leaf3: '#5cbf6c', pot: '#b5623b', potHi: '#c9744a', potDk: '#9a4f2e',
+    };
+    const BOOK_COLORS = ['#c94f4f', '#e0b34a', '#4f8fc9', '#5fb07a', '#9a6bc9', '#e07a4f', '#d8d8d8', '#4a63d8', '#2f8f8a'];
+    const CODE_COLORS = ['#9fb4ff', '#c792ea', '#7fd4a0', '#ffcb6b', '#f78c6c', '#89ddff', '#d6d8e8'];
+
+    // ---------- Fuente pixel 3×5 ----------
+    const FONT: Record<string, string> = {
+      A: '010101111101101', B: '110101110101110', C: '011100100100011', D: '110101101101110', E: '111100110100111',
+      F: '111100110100100', G: '011100101101011', H: '101101111101101', I: '111010010010111', J: '001001001101010',
+      K: '101101110101101', L: '100100100100111', M: '101111111101101', N: '110101101101101', O: '010101101101010',
+      P: '110101110100100', Q: '010101101110011', R: '110101110101101', S: '011100010001110', T: '111010010010010',
+      U: '101101101101111', V: '101101101101010', W: '101101111111101', X: '101101010101101', Y: '101101010010010',
+      Z: '111001010100111', '0': '111101101101111', '1': '010110010010111', '2': '110001010100111', '3': '110001010001110',
+      '4': '101101111001001', '5': '111100110001110', '6': '011100111101111', '7': '111001010010010', '8': '111101111101111',
+      '9': '111101111001110', '-': '000000111000000', '.': '000000000000010', ':': '000010000010000', '/': '001001010100100',
+      '>': '100010001010100', '<': '001010100010001', '!': '010010010000010', '?': '110001010000010', ' ': '000000000000000',
+      '✓': '000001001101010', '_': '000000000000111',
+    };
+    const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
+    const textW = (s: string, sc = 1) => Math.max(0, s.length * 4 * sc - sc);
+
+    // ---------- Primitivas ----------
+    const R = (x: number, y: number, w: number, h: number, c: string) => {
+      ctx.fillStyle = c;
+      ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+    };
+    const text = (s: string, x: number, y: number, c: string, sc = 1) => {
+      ctx.fillStyle = c;
+      let cx = Math.round(x);
+      for (const ch of norm(s)) {
+        const g = FONT[ch] ?? FONT['?'];
+        for (let i = 0; i < 15; i++) {
+          if (g[i] === '1') ctx.fillRect(cx + (i % 3) * sc, Math.round(y) + Math.floor(i / 3) * sc, sc, sc);
+        }
+        cx += 4 * sc;
+      }
+    };
+    const line = (x0: number, y0: number, x1: number, y1: number, w: number, c: string) => {
+      const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
+      ctx.fillStyle = c;
+      const o = Math.floor(w / 2);
+      for (let i = 0; i <= steps; i++) {
+        const x = Math.round(x0 + ((x1 - x0) * i) / steps) - o;
+        const y = Math.round(y0 + ((y1 - y0) * i) / steps) - o;
+        ctx.fillRect(x, y, w, w);
+      }
+    };
+    const disc = (cx: number, cy: number, r: number, c: string) => {
+      for (let dy = -r; dy <= r; dy++) {
+        const half = Math.floor(Math.sqrt(r * r - dy * dy) + 0.35);
+        R(cx - half, cy + dy, half * 2 + 1, 1, c);
+      }
+    };
+    const rng = (seed: number) => () => {
+      seed |= 0;
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    const bubble = (x: number, y: number, w: number, h: number, tailX: number) => {
+      R(x + 1, y, w - 2, h, P.ink);
+      R(x, y + 1, w, h - 2, P.ink);
+      R(x + 1, y + 1, w - 2, h - 2, '#f4f1e8');
+      R(tailX, y + h - 1, 3, 1, '#f4f1e8');
+      R(tailX + 1, y + h, 2, 1, P.ink);
+      R(tailX, y + h, 1, 1, P.ink);
+      R(tailX + 1, y + h - 1, 1, 1, '#f4f1e8');
+      R(tailX + 2, y + h + 1, 1, 1, P.ink);
+    };
+
+    // ---------- Datos precalculados ----------
+    const bookR = rng(7);
+    const shelves = [
+      { top: 49, bottom: 68 },
+      { top: 71, bottom: 90 },
+      { top: 93, bottom: 112 },
+      { top: 115, bottom: 136 },
+    ];
+    type Book = { x: number; y: number; w: number; h: number; c: string };
+    const books: Book[] = [];
+    shelves.forEach((s, si) => {
+      let x = 112;
+      const limit = si === 1 ? 134 : si === 3 ? 136 : 145;
+      while (x < limit) {
+        const w = 2 + Math.floor(bookR() * 3);
+        if (x + w > limit) break;
+        const maxH = s.bottom - s.top - 2;
+        const h = Math.max(10, maxH - Math.floor(bookR() * 6));
+        books.push({ x, y: s.bottom - h, w, h, c: BOOK_COLORS[Math.floor(bookR() * BOOK_COLORS.length)] });
+        x += w + (bookR() < 0.12 ? 1 : 0);
+      }
+    });
+    const stars = Array.from({ length: 16 }, (_, i) => {
+      const r = rng(100 + i);
+      return { x: 33 + Math.floor(r() * 54), y: 25 + Math.floor(r() * 22), p: r() * 6 };
+    });
+    const skyline = [
+      [32, 66, 8], [40, 60, 6], [46, 64, 7], [53, 57, 5], [58, 62, 9], [67, 58, 6], [73, 63, 8], [81, 60, 7],
+    ];
+    const cityLights = Array.from({ length: 14 }, (_, i) => {
+      const r = rng(300 + i);
+      const b = skyline[Math.floor(r() * skyline.length)];
+      return { x: b[0] + 1 + Math.floor(r() * (b[2] - 2)), y: b[1] + 2 + Math.floor(r() * (74 - b[1] - 3)) };
+    });
+
+    type Tok = { w: number; c: string };
+    type CodeLine = { indent: number; toks: Tok[] };
+    const genCode = (seed: number): CodeLine[] => {
+      const r = rng(seed * 97 + 13);
+      const lines: CodeLine[] = [];
+      let indent = 0;
+      for (let i = 0; i < 16; i++) {
+        if (indent > 0 && r() < 0.25) indent--;
+        const n = r() < 0.12 ? 0 : 1 + Math.floor(r() * 4);
+        const toks: Tok[] = [];
+        for (let j = 0; j < n; j++) toks.push({ w: 2 + Math.floor(r() * 8), c: CODE_COLORS[Math.floor(r() * CODE_COLORS.length)] });
+        lines.push({ indent, toks });
+        if (n > 0 && indent < 3 && r() < 0.32) indent++;
+      }
+      return lines;
+    };
+
+    // ---------- Estado ----------
+    const hour = new Date().getHours();
+    const S = {
+      t: 0,
+      night: hour < 7 || hour >= 19,
+      lamp: true,
+      dark: 0,
+      proj: 0,
+      code: genCode(0),
+      totalToks: 0,
+      typed: 0,
+      phase: 'typing' as 'typing' | 'think' | 'build' | 'deployed',
+      phaseT: 0,
+      thought: false,
+      hover: null as string | null,
+      catUntil: 0,
+      plantUntil: 0,
+      notifUntil: 0,
+      nextNotif: 6000,
+      nextBlink: 2500,
+      blinkUntil: 0,
+      steamUntil: 0,
+      waveUntil: 0,
+      cups: 3,
+      interacted: false,
+      tick: 0,
+    };
+    const countToks = () => S.code.reduce((a, l) => a + l.toks.length, 0);
+    S.totalToks = countToks();
+    S.dark = S.night ? 0.44 : 0;
+    if (reduceMotion) S.typed = S.totalToks;
+
+    const setProject = (i: number) => {
+      S.proj = (i + data.projects.length) % data.projects.length;
+      S.code = genCode(S.proj + 1);
+      S.totalToks = countToks();
+      S.typed = reduceMotion ? S.totalToks : 0;
+      S.phase = 'typing';
+      S.phaseT = 0;
+      S.thought = false;
+    };
+
+    // ---------- Actualización ----------
+    const update = (dt: number) => {
+      S.t += dt;
+      S.phaseT += dt;
+      const t = S.t;
+
+      if (reduceMotion) {
+        // Escena fija: código completo, sin ciclo de proyectos.
+      } else if (S.phase === 'typing') {
+        S.typed = Math.min(S.totalToks, S.typed + dt / 85);
+        if (!S.thought && S.typed >= S.totalToks * 0.55) {
+          S.phase = 'think';
+          S.phaseT = 0;
+          S.thought = true;
+        } else if (S.typed >= S.totalToks) {
+          S.phase = 'build';
+          S.phaseT = 0;
+        }
+      } else if (S.phase === 'think' && S.phaseT > 1500) {
+        S.phase = 'typing';
+        S.phaseT = 0;
+      } else if (S.phase === 'build' && S.phaseT > 1700) {
+        S.phase = 'deployed';
+        S.phaseT = 0;
+      } else if (S.phase === 'deployed' && S.phaseT > 2000) {
+        setProject(S.proj + 1);
+        if (!dialog.hidden && currentId === 'monitor') openDialog('monitor', false);
+      }
+
+      if (t > S.nextBlink) {
+        S.blinkUntil = t + 140;
+        S.nextBlink = t + 2500 + Math.random() * 3000;
+      }
+      if (t > S.nextNotif) {
+        S.notifUntil = t + 2600;
+        S.nextNotif = t + 14000 + Math.random() * 6000;
+      }
+      const target = S.night ? (S.lamp ? 0.44 : 0.64) : S.lamp ? 0.02 : 0.06;
+      S.dark += (target - S.dark) * Math.min(1, dt / 180);
+    };
+
+    // ---------- Dibujo: cuarto ----------
+    const drawRoom = () => {
+      const t = S.t;
+      // Pared
+      R(0, 0, W, 134, P.wall);
+      for (let x = 10; x < W; x += 20) R(x, 4, 1, 124, P.wallStripe);
+      R(0, 0, W, 4, P.wallTop);
+      R(0, 128, W, 6, P.base);
+      R(0, 128, W, 1, P.baseHi);
+      // Piso
+      R(0, 134, W, 46, P.floor);
+      R(0, 134, W, 1, P.floorHi);
+      for (let row = 0; row < 6; row++) {
+        const y = 141 + row * 8;
+        R(0, y, W, 1, P.floorLine);
+        for (let x = (row * 37) % 48; x < W; x += 48) R(x, y - 7, 1, 7, P.floorLine);
+      }
+      // Tapete
+      R(142, 137, 94, 15, P.cobaltDk);
+      R(140, 138, 98, 13, P.cobaltDk);
+      R(144, 139, 90, 11, P.cobalt);
+      R(146, 141, 86, 1, P.cobaltHi);
+      R(146, 147, 86, 1, P.cobaltHi);
+      for (let x = 142; x < 236; x += 3) R(x, 152, 1, 2, P.creamDk);
+
+      drawWindow();
+      drawCat();
+      drawPlant();
+      drawBookshelf();
+      drawPoster();
+      drawClock();
+      drawDesk();
+      drawChar();
+    };
+
+    const drawWindow = () => {
+      const t = S.t;
+      // Cielo
+      if (S.night) {
+        R(32, 24, 56, 12, '#1a2150');
+        R(32, 36, 56, 14, '#222b62');
+        R(32, 50, 56, 26, '#2b3672');
+        skyline.forEach(([x, y, w]) => R(x, y, w, 76 - y, '#141733'));
+        cityLights.forEach((l, i) => {
+          if ((Math.floor(t / 2500) + i) % 5 !== 0) R(l.x, l.y, 1, 1, '#ffd36b');
+        });
+      } else {
+        R(32, 24, 56, 12, '#6fb6f5');
+        R(32, 36, 56, 14, '#8cc8fa');
+        R(32, 50, 56, 26, '#aad8ff');
+        disc(76, 32, 4, '#ffe28a');
+        R(75, 28, 3, 1, '#fff3c4');
+        // Nubes
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(32, 24, 56, 52);
+        ctx.clip();
+        const cx = ((t / 180) % 90) - 20;
+        R(32 + cx, 38, 14, 3, '#f4f8ff');
+        R(35 + cx, 36, 7, 2, '#f4f8ff');
+        const cx2 = ((t / 260 + 50) % 100) - 25;
+        R(32 + cx2, 46, 11, 2, '#eef4ff');
+        R(35 + cx2, 44, 5, 2, '#eef4ff');
+        ctx.restore();
+        skyline.forEach(([x, y, w]) => R(x, y, w, 76 - y, '#7fa7d6'));
+      }
+      // Marco
+      R(28, 20, 64, 4, P.cream);
+      R(28, 76, 64, 4, P.cream);
+      R(28, 20, 4, 60, P.cream);
+      R(88, 20, 4, 60, P.cream);
+      R(59, 24, 2, 52, P.cream);
+      R(32, 48, 56, 2, P.cream);
+      R(32, 24, 56, 1, P.creamDk);
+      R(32, 24, 1, 52, P.creamDk);
+      // Repisa
+      R(24, 80, 72, 4, P.cream);
+      R(24, 84, 72, 1, P.creamDk);
+      R(24, 85, 72, 1, '#2f3260');
+      // Cortinas
+      R(12, 13, 94, 2, '#1e2040');
+      R(16, 15, 14, 74, P.cobalt);
+      R(90, 15, 14, 74, P.cobalt);
+      [19, 24, 93, 99].forEach((x) => R(x, 15, 1, 74, P.cobaltDk));
+      R(16, 86, 14, 3, P.cobaltDk);
+      R(90, 86, 14, 3, P.cobaltDk);
+    };
+
+    const drawCat = () => {
+      const t = S.t;
+      const awake = t < S.catUntil;
+      if (!awake) {
+        const b = Math.sin(t / 650) > 0 ? 0 : 1;
+        R(33, 76, 2, 3, P.cat);
+        R(34, 78, 12, 2, P.cat);
+        R(39, 72 + b, 16, 1, P.cat);
+        R(38, 73 + b, 18, 7 - b, P.cat);
+        [42, 46, 50].forEach((x) => R(x, 73 + b, 1, 4, P.catDk));
+        R(52, 72, 8, 8, P.cat);
+        R(52, 70, 2, 2, P.cat);
+        R(57, 70, 2, 2, P.cat);
+        R(53, 71, 1, 1, '#f2a3a3');
+        R(58, 71, 1, 1, '#f2a3a3');
+        R(53, 75, 2, 1, P.catDk);
+        R(57, 75, 2, 1, P.catDk);
+        R(55, 77, 1, 1, '#e58a8a');
+        R(52, 79, 5, 1, P.catLt);
+        // Zzz
+        if (!reduceMotion) {
+          for (let i = 0; i < 2; i++) {
+            const ph = ((t / 2200 + i * 0.5) % 1);
+            const a = ph < 0.8 ? 1 : 0;
+            if (a) text('Z', 60 + ph * 6, 66 - ph * 12, `rgba(244,241,232,${(1 - ph).toFixed(2)})`);
+          }
+        }
+      } else {
+        R(36, 66, 2, 12, P.cat);
+        R(37, 64, 2, 3, P.cat);
+        R(40, 70, 14, 10, P.cat);
+        R(41, 69, 12, 1, P.cat);
+        [44, 48].forEach((x) => R(x, 71, 1, 5, P.catDk));
+        R(48, 74, 5, 6, P.catLt);
+        R(49, 62, 10, 9, P.cat);
+        R(49, 59, 3, 3, P.cat);
+        R(56, 59, 3, 3, P.cat);
+        R(50, 60, 1, 1, '#f2a3a3');
+        R(57, 60, 1, 1, '#f2a3a3');
+        R(51, 65, 2, 2, '#7fd46a');
+        R(55, 65, 2, 2, '#7fd46a');
+        R(52, 65, 1, 1, P.ink);
+        R(56, 65, 1, 1, P.ink);
+        R(54, 68, 1, 1, '#e58a8a');
+        const w = textW(C.catSays);
+        bubble(56, 46, w + 6, 9, 58);
+        text(C.catSays, 59, 48, P.ink);
+      }
+    };
+
+    const drawPlant = () => {
+      const t = S.t;
+      const shaking = t < S.plantUntil;
+      const leaves: [number, number, number, number, string][] = [
+        [12, 96, 3, 22, P.leaf1], [6, 100, 6, 4, P.leaf2], [3, 97, 4, 3, P.leaf2], [16, 93, 6, 4, P.leaf3],
+        [20, 89, 4, 4, P.leaf3], [7, 108, 5, 3, P.leaf3], [2, 105, 5, 3, P.leaf2], [17, 104, 7, 3, P.leaf2],
+        [22, 100, 4, 3, P.leaf1], [9, 90, 4, 7, P.leaf2], [12, 85, 3, 6, P.leaf3], [5, 93, 4, 3, P.leaf1],
+      ];
+      leaves.forEach(([x, y, w, h, c], i) => {
+        const amp = shaking ? 2 : 1;
+        const speed = shaking ? 90 : 900;
+        const dx = y < 104 && !reduceMotion ? Math.round(Math.sin(t / speed + i) * amp * ((104 - y) / 18)) : 0;
+        R(x + dx, y, w, h, c);
+      });
+      R(6, 117, 18, 4, P.potHi);
+      R(8, 121, 14, 15, P.pot);
+      R(18, 121, 3, 15, P.potDk);
+      R(8, 136, 14, 2, 'rgba(0,0,0,0.25)');
+    };
+
+    const drawBookshelf = () => {
+      R(106, 140, 44, 3, 'rgba(0,0,0,0.25)');
+      R(108, 46, 40, 96, P.woodDk);
+      R(111, 49, 34, 88, P.woodDk2);
+      [46, 68, 90, 112].forEach((y) => {
+        R(108, y, 40, 3, P.wood);
+        R(108, y, 40, 1, P.woodHi);
+      });
+      R(108, 136, 40, 6, P.wood);
+      R(108, 136, 40, 1, P.woodHi);
+      books.forEach((b) => {
+        R(b.x, b.y, b.w, b.h, b.c);
+        R(b.x, b.y, 1, b.h, 'rgba(0,0,0,0.22)');
+        if (b.h > 12) R(b.x, b.y + 3, b.w, 1, 'rgba(255,255,255,0.25)');
+      });
+      // Trofeo (repisa 2)
+      R(137, 79, 6, 4, '#e8b33a');
+      R(136, 80, 1, 2, '#e8b33a');
+      R(143, 80, 1, 2, '#e8b33a');
+      R(139, 83, 2, 3, '#c8932a');
+      R(137, 86, 6, 4, '#6b4a2a');
+      R(138, 80, 1, 2, '#fff3c4');
+      // Libros acostados (repisa 4)
+      R(137, 131, 8, 2, '#c94f4f');
+      R(138, 128, 7, 3, '#4f8fc9');
+      R(137, 125, 8, 3, '#e0b34a');
+      R(139, 122, 5, 3, '#5fb07a');
+    };
+
+    const drawPoster = () => {
+      R(156, 22, 26, 36, P.cream);
+      R(158, 24, 22, 32, '#26357f');
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(158, 24, 22, 32);
+      ctx.clip();
+      disc(174, 44, 4, '#ffb347');
+      for (let dy = 0; dy < 12; dy++) R(165 - dy, 44 + dy, 1 + dy * 2, 1, '#1a2360');
+      for (let dy = 0; dy < 10; dy++) R(176 - dy, 47 + dy, 1 + dy * 2, 1, '#141c4e');
+      ctx.restore();
+      text('SHIP', 161, 27, '#f4f1e8');
+      text('IT!', 163, 33, '#ffb347');
+      R(168, 20, 2, 3, '#e04848');
+    };
+
+    const drawClock = () => {
+      const now = new Date();
+      disc(239, 21, 7, P.ink);
+      disc(239, 21, 6, P.cream);
+      [[239, 16], [244, 21], [239, 26], [234, 21]].forEach(([x, y]) => R(x, y, 1, 1, P.creamDk));
+      const h = ((now.getHours() % 12) + now.getMinutes() / 60) * (Math.PI / 6);
+      const m = now.getMinutes() * (Math.PI / 30);
+      line(239, 21, 239 + Math.sin(h) * 3, 21 - Math.cos(h) * 3, 1, P.ink);
+      line(239, 21, 239 + Math.sin(m) * 5, 21 - Math.cos(m) * 5, 1, '#e04848');
+    };
+
+    const drawDesk = () => {
+      // Homelab (debajo del escritorio)
+      R(270, 141, 36, 2, 'rgba(0,0,0,0.3)');
+      R(274, 117, 28, 11, '#1d1f33');
+      R(274, 129, 28, 13, '#1d1f33');
+      R(275, 118, 26, 9, '#26293f');
+      R(275, 130, 26, 11, '#26293f');
+      for (let y = 120; y < 126; y += 2) R(288, y, 11, 1, '#15172a');
+      for (let y = 132; y < 140; y += 2) R(288, y, 11, 1, '#15172a');
+      R(300, 110, 1, 7, '#15172a');
+      // Patas y cubierta
+      R(186, 140, 128, 2, 'rgba(0,0,0,0.25)');
+      R(188, 110, 4, 32, P.woodDk);
+      R(306, 110, 4, 32, P.woodDk);
+      R(184, 104, 130, 4, P.wood);
+      R(184, 104, 130, 1, P.woodHi);
+      R(184, 108, 130, 2, P.woodDk);
+      // Monitor
+      R(239, 96, 6, 7, '#2a2c40');
+      R(234, 102, 16, 2, '#2a2c40');
+      R(214, 56, 56, 40, P.ink);
+      R(214, 56, 56, 1, '#262a45');
+      R(216, 58, 52, 36, '#0b0d1f');
+      // Teclado y mouse
+      R(208, 101, 26, 3, '#2a2c40');
+      for (let x = 209; x < 233; x += 2) R(x, 101, 1, 1, '#4a4d6b');
+      R(252, 101, 6, 3, '#d8d8e0');
+      R(252, 101, 6, 1, '#f4f4fa');
+      // Taza
+      R(264, 95, 8, 9, '#ecebf2');
+      R(264, 95, 8, 1, '#4a2c1a');
+      R(264, 98, 8, 2, P.cobalt);
+      R(272, 97, 2, 1, '#ecebf2');
+      R(273, 97, 1, 4, '#ecebf2');
+      R(272, 100, 2, 1, '#ecebf2');
+      R(270, 96, 2, 8, '#cfcdd8');
+      // Teléfono en base
+      const vib = S.t < S.notifUntil && S.t > S.notifUntil - 2000 && Math.floor(S.t / 60) % 2 === 0 ? 1 : 0;
+      R(279, 100, 9, 4, '#3a3d55');
+      R(280 + vib, 87, 7, 13, '#111320');
+      // Lámpara
+      R(296, 101, 13, 3, '#1e2040');
+      R(296, 101, 13, 1, '#34375e');
+      line(302, 101, 306, 80, 2, '#1e2040');
+      line(306, 80, 299, 70, 2, '#1e2040');
+      R(290, 67, 12, 4, P.cobalt);
+      R(288, 71, 12, 3, P.cobalt);
+      R(290, 67, 12, 1, P.cobaltHi);
+      R(288, 73, 12, 1, P.cobaltDk);
+      R(303, 69, 3, 3, '#1e2040');
+      // Neon (base apagada)
+      text('</>', 284, 25, '#2d3570', 2);
+    };
+
+    // ---------- Personaje ----------
+    const drawChar = () => {
+      const t = S.t;
+      const hovered = S.hover === 'me';
+      const pose = hovered || t < S.waveUntil ? 'wave' : S.phase === 'think' ? 'think' : S.phase === 'deployed' ? 'celebrate' : S.phase === 'typing' ? 'type' : 'idle';
+      const tp = pose === 'type' && !reduceMotion ? Math.floor(t / 110) % 2 : 0;
+      const oy = pose === 'type' && !reduceMotion && Math.floor(t / 1300) % 5 === 0 ? 1 : 0;
+
+      // Silla (respaldo)
+      R(166, 66, 10, 50, P.chair);
+      R(167, 64, 8, 2, P.chair);
+      R(169, 68, 2, 44, P.cobaltDk);
+      R(166, 66, 1, 50, P.chairHi);
+      // Asiento y base
+      R(166, 112, 38, 5, P.chair);
+      R(166, 112, 38, 1, P.chairHi);
+      R(183, 117, 4, 17, P.metal);
+      R(170, 133, 30, 3, P.chairHi);
+      [169, 183, 197].forEach((x) => R(x, 136, 3, 3, '#0e0f18'));
+
+      // Pierna lejana
+      R(200, 112, 8, 4, P.jeansDk);
+      R(202, 115, 5, 22, P.jeansDk);
+      R(201, 137, 10, 3, P.sole);
+      // Pierna cercana
+      R(186, 107, 28, 8, P.jeans);
+      R(186, 107, 28, 1, '#3a4d82');
+      R(208, 114, 7, 22, P.jeans);
+      R(213, 114, 2, 22, P.jeansDk);
+      R(207, 136, 13, 4, P.shoe);
+      R(207, 139, 13, 1, P.sole);
+      R(215, 136, 5, 1, '#ffffff');
+
+      // Brazo lejano (detrás del torso)
+      if (pose === 'type' || pose === 'think' || pose === 'idle') {
+        line(192, 86, 199, 97, 4, P.hoodDk);
+        line(199, 97, 214, 100, 3, P.hoodDk);
+        R(214, 98 + (1 - tp), 3, 2, P.skinDk);
+      }
+
+      // Torso
+      R(177, 76, 9, 9, P.hoodDk);
+      R(178, 77, 6, 2, P.hoodHi);
+      R(180, 80, 15, 2, P.hood);
+      R(178, 82, 20, 32, P.hood);
+      R(194, 84, 4, 28, P.hoodHi);
+      R(188, 102, 10, 6, P.hoodDk);
+      R(196, 83, 1, 7, '#d8d8e0');
+      R(197, 83, 1, 6, '#d8d8e0');
+
+      // Cabeza
+      R(189, 77, 6, 5, P.skinDk);
+      if (pose === 'wave') {
+        const y = oy;
+        R(186, 64 + y, 13, 14, P.skin);
+        R(187, 78 + y, 11, 1, P.skin);
+        R(189, 79 + y, 7, 1, P.skin);
+        R(185, 70 + y, 1, 3, P.skinDk);
+        R(199, 70 + y, 1, 3, P.skinDk);
+        R(185, 59 + y, 15, 6, P.hair);
+        R(184, 61 + y, 2, 10, P.hair);
+        R(199, 61 + y, 2, 9, P.hair);
+        R(186, 57 + y, 2, 2, P.hair);
+        R(190, 56 + y, 2, 3, P.hair);
+        R(195, 57 + y, 2, 2, P.hair);
+        R(198, 58 + y, 2, 2, P.hair);
+        R(187, 64 + y, 6, 2, P.hair);
+        R(193, 64 + y, 4, 1, P.hair);
+        R(188, 66 + y, 2, 1, P.hair);
+        R(188, 60 + y, 6, 1, P.hairHi);
+        // Lentes
+        const frame = '#0e0e14';
+        [[187, 69], [193, 69]].forEach(([x, yy]) => {
+          R(x, yy + y, 5, 1, frame);
+          R(x, yy + 3 + y, 5, 1, frame);
+          R(x, yy + y, 1, 4, frame);
+          R(x + 4, yy + y, 1, 4, frame);
+        });
+        R(192, 70 + y, 1, 1, frame);
+        const blink = S.t < S.blinkUntil;
+        if (blink) {
+          R(188, 71 + y, 3, 1, P.skinDk);
+          R(194, 71 + y, 3, 1, P.skinDk);
+        } else {
+          R(189, 70 + y, 1, 2, P.hair);
+          R(195, 70 + y, 1, 2, P.hair);
+        }
+        R(190, 75 + y, 5, 1, P.mouth);
+        R(189, 74 + y, 1, 1, P.mouth);
+        R(195, 74 + y, 1, 1, P.mouth);
+      } else {
+        const y = oy;
+        R(187, 65 + y, 13, 13, P.skin);
+        R(188, 78 + y, 8, 1, P.skin);
+        R(200, 71 + y, 1, 2, P.skin);
+        R(197, 76 + y, 2, 1, P.mouth);
+        R(189, 70 + y, 3, 4, P.skinDk);
+        R(190, 71 + y, 1, 2, '#8f5a3c');
+        R(185, 60 + y, 15, 6, P.hair);
+        R(184, 62 + y, 6, 15, P.hair);
+        R(186, 58 + y, 2, 2, P.hair);
+        R(190, 57 + y, 2, 3, P.hair);
+        R(194, 58 + y, 2, 2, P.hair);
+        R(197, 59 + y, 2, 2, P.hair);
+        R(183, 61 + y, 2, 3, P.hair);
+        R(196, 64 + y, 5, 3, P.hair);
+        R(199, 66 + y, 2, 2, P.hair);
+        R(190, 66 + y, 2, 3, P.hair);
+        R(188, 61 + y, 6, 1, P.hairHi);
+        const frame = '#0e0e14';
+        R(194, 69 + y, 6, 1, frame);
+        R(194, 72 + y, 6, 1, frame);
+        R(194, 69 + y, 1, 4, frame);
+        R(199, 69 + y, 1, 4, frame);
+        R(191, 70 + y, 3, 1, frame);
+        if (S.t < S.blinkUntil) R(196, 71 + y, 2, 1, P.skinDk);
+        else R(197, 70 + y, 1, 2, P.hair);
+        R(198, 70 + y, 1, 1, 'rgba(159,211,255,0.8)');
+      }
+
+      // Brazo cercano
+      if (pose === 'type' || pose === 'idle') {
+        line(189, 85, 195, 97, 5, P.armNear);
+        line(195, 97, 208, 100, 4, P.armNear);
+        R(206, 98, 2, 4, P.hoodDk);
+        R(208, 99 - tp, 4, 3, P.skin);
+      } else if (pose === 'think') {
+        line(189, 85, 195, 98, 5, P.armNear);
+        line(195, 98, 198, 83, 4, P.armNear);
+        R(196, 78, 4, 4, P.skin);
+        const dots = reduceMotion ? 3 : Math.floor(t / 300) % 4;
+        bubble(202, 44, 17, 9, 203);
+        for (let i = 0; i < dots; i++) R(205 + i * 4, 48, 2, 2, P.ink);
+      } else if (pose === 'celebrate') {
+        line(189, 84, 193, 72, 5, P.armNear);
+        line(193, 72, 196, 59, 4, P.armNear);
+        R(194, 54, 5, 5, P.skin);
+        if (!reduceMotion && Math.floor(t / 180) % 2 === 0) {
+          [[190, 52], [201, 53], [196, 49], [203, 58]].forEach(([x, y]) => R(x, y, 1, 1, '#ffd36b'));
+        } else {
+          [[191, 55], [200, 50], [188, 58]].forEach(([x, y]) => R(x, y, 1, 1, '#ffd36b'));
+        }
+      } else if (pose === 'wave') {
+        const w = reduceMotion ? 0 : Math.floor(t / 220) % 2;
+        line(190, 85, 199, 80, 5, P.armNear);
+        line(199, 80, 203 + w, 66, 4, P.armNear);
+        R(201 + w, 60, 5, 6, P.skin);
+        R(201 + w, 59, 1, 2, P.skin);
+        R(203 + w, 58, 1, 2, P.skin);
+        R(205 + w, 59, 1, 2, P.skin);
+        const msg = C.hello;
+        const bw = textW(msg) + 6;
+        bubble(168, 40, bw, 9, 182);
+        text(msg, 171, 42, P.ink);
+      }
+    };
+
+    // ---------- Capas emisivas (después de la sombra nocturna) ----------
+    const drawScreen = () => {
+      const p = data.projects[S.proj];
+      const x0 = 217;
+      const y0 = 59;
+      R(x0, y0, 50, 33, '#0f1226');
+      R(x0, y0, 50, 6, '#1c2142');
+      const label = p.short.length > 10 ? p.short.slice(0, 10) : p.short;
+      R(x0 + 1, y0 + 1, textW(label) + 4, 5, '#0f1226');
+      text(label, x0 + 3, y0 + 1, '#9fb4ff');
+      R(x0 + 44, y0 + 2, 1, 1, '#ff6b6b');
+      R(x0 + 46, y0 + 2, 1, 1, '#ffcb6b');
+      R(x0 + 48, y0 + 2, 1, 1, '#7fd4a0');
+      R(x0, y0 + 6, 4, 27, '#12162e');
+
+      // Código
+      const typed = Math.floor(S.typed);
+      let remaining = typed;
+      let curLine = 0;
+      const lens = S.code.map((l) => l.toks.length);
+      for (let i = 0; i < lens.length; i++) {
+        if (remaining >= lens[i]) {
+          remaining -= lens[i];
+          curLine = i + 1;
+        } else {
+          curLine = i;
+          break;
+        }
+      }
+      curLine = Math.min(curLine, S.code.length - 1);
+      const panel = S.phase === 'build' || S.phase === 'deployed';
+      const visible = panel ? 3 : 6;
+      const start = Math.max(0, curLine - (visible - 1));
+      let count = 0;
+      for (let i = 0; i < start; i++) count += lens[i];
+      let cursor: [number, number] | null = null;
+      for (let li = start; li < Math.min(S.code.length, start + visible); li++) {
+        const ly = y0 + 8 + (li - start) * 4;
+        R(x0 + 1, ly, 2, 1, '#2a3160');
+        const ln = S.code[li];
+        let lx = x0 + 6 + ln.indent * 3;
+        for (const tok of ln.toks) {
+          if (count >= typed) break;
+          const w = Math.min(tok.w, x0 + 49 - lx);
+          if (w > 0) R(lx, ly, w, 2, tok.c);
+          lx += tok.w + 1;
+          count++;
+        }
+        if (li === curLine) cursor = [Math.min(lx, x0 + 48), ly];
+        if (count >= typed && li >= curLine) break;
+      }
+      if (cursor && !panel && Math.floor(S.t / 400) % 2 === 0) R(cursor[0], cursor[1] - 1, 1, 4, '#e8ecff');
+
+      if (panel) {
+        R(x0, y0 + 20, 50, 13, '#080a18');
+        R(x0, y0 + 20, 50, 1, '#1c2142');
+        if (S.phase === 'build') {
+          text('> BUILD', x0 + 2, y0 + 22, '#9fb4ff');
+          const pr = Math.min(1, S.phaseT / 1600);
+          R(x0 + 2, y0 + 28, 46, 3, '#1c2142');
+          R(x0 + 2, y0 + 28, Math.round(46 * pr), 3, '#4a7dff');
+        } else {
+          text('✓ DEPLOYED', x0 + 3, y0 + 22, '#5fe08a');
+          R(x0 + 2, y0 + 28, 46, 3, '#1f6b3d');
+          R(x0 + 2, y0 + 28, 46, 3, '#5fe08a');
+        }
+      }
+      // reflejo
+      R(x0 + 40, y0 + 7, 1, 3, 'rgba(255,255,255,0.06)');
+    };
+
+    const drawEmissive = () => {
+      const t = S.t;
+      // Estrellas y luna (encima de la sombra)
+      if (S.night) {
+        stars.forEach((s) => {
+          const on = reduceMotion || Math.sin(t / 700 + s.p) > -0.4;
+          if (on && !(s.x > 58 && s.x < 62) && !(s.y > 47 && s.y < 51)) R(s.x, s.y, 1, 1, '#f4f1d6');
+        });
+        disc(44, 31, 4, '#f4f1d6');
+        disc(46, 30, 3, '#222b62');
+        R(47, 30, 1, 1, '#1a2150');
+      }
+      drawScreen();
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      // Resplandor del monitor (discos escalonados = luz "pixel")
+      const glow = S.night ? 0.045 : 0.012;
+      [34, 26, 18].forEach((r) => disc(242, 76, r, `rgba(70,110,255,${glow})`));
+      if (S.night) R(187, 64, 14, 15, 'rgba(70,120,255,0.10)');
+      // Lámpara
+      if (S.lamp) {
+        R(289, 74, 11, 1, 'rgba(255,240,190,0.9)');
+        ctx.fillStyle = `rgba(255,205,130,${S.night ? 0.13 : 0.05})`;
+        ctx.beginPath();
+        ctx.moveTo(289, 74);
+        ctx.lineTo(300, 74);
+        ctx.lineTo(304, 104);
+        ctx.lineTo(258, 104);
+        ctx.closePath();
+        ctx.fill();
+        R(254, 103, 56, 2, `rgba(255,205,130,${S.night ? 0.18 : 0.06})`);
+        if (S.night) [40, 30, 20].forEach((r) => disc(292, 92, r, 'rgba(255,190,120,0.035)'));
+      }
+      // Sol en el piso (día)
+      if (!S.night) {
+        ctx.fillStyle = 'rgba(255,236,190,0.09)';
+        ctx.beginPath();
+        ctx.moveTo(34, 135);
+        ctx.lineTo(90, 135);
+        ctx.lineTo(126, 170);
+        ctx.lineTo(62, 170);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // Neón
+      const flick = !reduceMotion && Math.sin(t / 97) > 0.985;
+      if (!flick) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        const a = S.night ? 0.28 : 0.14;
+        [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dx, dy]) => text('</>', 284 + dx, 25 + dy, `rgba(90,130,255,${a})`, 2));
+        ctx.restore();
+        text('</>', 284, 25, '#8fa6ff', 2);
+      }
+
+      // Teclado RGB
+      const hue = reduceMotion ? 225 : Math.floor(t / 15) % 360;
+      R(208, 104, 26, 1, `hsla(${hue},85%,62%,0.9)`);
+
+      // LEDs homelab
+      for (let i = 0; i < 4; i++) {
+        const on1 = reduceMotion || (Math.floor(t / 170) * 7 + i * 13) % 5 !== 0;
+        const on2 = reduceMotion || (Math.floor(t / 230) * 5 + i * 11) % 4 !== 0;
+        R(277 + i * 2, 120, 1, 1, on1 ? '#5fe08a' : '#1c3a28');
+        R(277 + i * 2, 133, 1, 1, on2 ? (i === 3 ? '#6d8bff' : '#5fe08a') : '#1c2a3a');
+      }
+
+      // Pantalla del teléfono
+      const vib = t < S.notifUntil && t > S.notifUntil - 2000 && Math.floor(t / 60) % 2 === 0 ? 1 : 0;
+      const px = 281 + vib;
+      if (t < S.notifUntil) {
+        R(px, 88, 5, 11, '#1a2340');
+        R(px, 90, 5, 3, '#25d366');
+        R(px + 1, 94, 3, 1, '#e8e8f0');
+        R(px + 1, 96, 2, 1, '#8a93b8');
+        if (Math.floor(t / 250) % 2 === 0) text('!', px + 1, 80, '#ffd36b');
+      } else {
+        R(px, 88, 5, 11, '#141a30');
+        R(px + 1, 90, 3, 1, '#2a3360');
+      }
+
+      // Vapor del café
+      if (!reduceMotion) {
+        const burst = t < S.steamUntil;
+        const n = burst ? 6 : 3;
+        for (let i = 0; i < n; i++) {
+          const ph = (t / (burst ? 500 : 1000) + i / n) % 1;
+          const y = 93 - ph * (burst ? 16 : 11);
+          const x = 265 + (i % 3) * 2 + Math.round(Math.sin(ph * 6 + i));
+          R(x, y, 1, 2, `rgba(235,235,245,${(0.55 * (1 - ph)).toFixed(2)})`);
+        }
+      }
+    };
+
+    // Flecha sobre el objeto enfocado
+    const drawPointer = () => {
+      let id = S.hover;
+      if (!id && !S.interacted && Math.floor(S.t / 5000) % 2 === 0) id = 'monitor';
+      if (!id) return;
+      const hs = hotspotRects[id];
+      if (!hs) return;
+      const bob = reduceMotion ? 0 : Math.round(Math.sin(S.t / 160) * 1.5);
+      const cx = Math.round(hs.x + hs.w / 2);
+      let y = hs.y - 8 + bob;
+      if (id === 'me') return;
+      if (id === 'window' || id === 'neon' || id === 'poster') y = Math.max(2, hs.y - 9 + bob);
+      R(cx - 3, y, 7, 1, P.ink);
+      R(cx - 4, y - 1, 9, 1, P.ink);
+      R(cx - 3, y - 1, 7, 1, '#fff8dc');
+      R(cx - 2, y, 5, 1, '#fff8dc');
+      R(cx - 1, y + 1, 3, 1, '#fff8dc');
+      R(cx, y + 2, 1, 1, '#fff8dc');
+      R(cx - 2, y + 1, 1, 1, P.ink);
+      R(cx + 2, y + 1, 1, 1, P.ink);
+      R(cx - 1, y + 2, 1, 1, P.ink);
+      R(cx + 1, y + 2, 1, 1, P.ink);
+      R(cx, y + 3, 1, 1, P.ink);
+    };
+
+    const draw = () => {
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, W, H);
+      drawRoom();
+      if (S.dark > 0.005) R(0, 0, W, H, `rgba(8,10,32,${S.dark.toFixed(3)})`);
+      drawEmissive();
+      drawPointer();
+    };
+
+    // ---------- Resolución nítida ----------
+    let scale = 1;
+    const resize = () => {
+      const cssW = canvas.clientWidth || W;
+      const k = Math.max(1, Math.ceil((cssW * (window.devicePixelRatio || 1)) / W));
+      if (k !== scale || canvas.width !== W * k) {
+        scale = k;
+        canvas.width = W * k;
+        canvas.height = H * k;
+      }
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      ctx.imageSmoothingEnabled = false;
+      draw();
+    };
+    new ResizeObserver(resize).observe(canvas);
+
+    // ---------- Hotspots ----------
+    const hotspotRects: Record<string, { x: number; y: number; w: number; h: number }> = {};
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('.hotspot'));
+    buttons.forEach((b) => {
+      const id = b.dataset.hotspot!;
+      hotspotRects[id] = { x: +b.dataset.x!, y: +b.dataset.y!, w: +b.dataset.w!, h: +b.dataset.h! };
+      const enter = () => {
+        S.hover = id;
+        if (reduceMotion) draw();
+      };
+      const leave = () => {
+        if (S.hover === id) S.hover = null;
+        if (reduceMotion) draw();
+      };
+      b.addEventListener('pointerenter', enter);
+      b.addEventListener('pointerleave', leave);
+      b.addEventListener('focus', enter);
+      b.addEventListener('blur', leave);
+      b.addEventListener('click', () => {
+        S.interacted = true;
+        lastTrigger = b;
+        handle(id, b);
+        if (reduceMotion) draw();
+      });
+    });
+    const btn = (id: string) => buttons.find((b) => b.dataset.hotspot === id);
+    const syncToggles = () => {
+      btn('window')?.setAttribute('aria-pressed', String(S.night));
+      btn('lamp')?.setAttribute('aria-pressed', String(S.lamp));
+    };
+    syncToggles();
+
+    const status = root.querySelector<HTMLElement>('.room-status')!;
+    let statusTimer = 0;
+    const say = (msg: string) => {
+      status.textContent = msg;
+      window.clearTimeout(statusTimer);
+      statusTimer = window.setTimeout(() => (status.textContent = ''), 3200);
+    };
+
+    const handle = (id: string, b: HTMLButtonElement) => {
+      switch (id) {
+        case 'window':
+          S.night = !S.night;
+          if (S.night) S.lamp = true;
+          syncToggles();
+          say(S.night ? C.nightOn : C.dayOn);
+          break;
+        case 'lamp':
+          S.lamp = !S.lamp;
+          syncToggles();
+          say(S.lamp ? C.lampOn : C.lampOff);
+          break;
+        case 'cat':
+          S.catUntil = S.t + 2600;
+          say(C.catMsg);
+          break;
+        case 'plant':
+          S.plantUntil = S.t + 900;
+          say(C.plantMsg);
+          break;
+        case 'mug':
+          S.cups++;
+          S.steamUntil = S.t + 1600;
+          openDialog('mug');
+          break;
+        case 'phone':
+          S.notifUntil = 0;
+          openDialog('phone');
+          break;
+        case 'me':
+          S.waveUntil = S.t + 2500;
+          openDialog('me');
+          break;
+        default:
+          openDialog(id);
+      }
+    };
+
+    // ---------- Diálogo estilo RPG ----------
+    const dialog = root.querySelector<HTMLElement>('.room-dialog')!;
+    const dEyebrow = dialog.querySelector<HTMLElement>('.room-dialog-eyebrow')!;
+    const dTitle = dialog.querySelector<HTMLElement>('.room-dialog-title')!;
+    const dBody = dialog.querySelector<HTMLElement>('.room-dialog-body')!;
+    const dActions = dialog.querySelector<HTMLElement>('.room-dialog-actions')!;
+    const dClose = dialog.querySelector<HTMLButtonElement>('.room-dialog-close')!;
+    let currentId: string | null = null;
+    let lastTrigger: HTMLButtonElement | null = null;
+    let typeTimer = 0;
+
+    const content = (id: string): { eyebrow: string; title: string; body: string; actions: Action[] } => {
+      const L = data.links;
+      switch (id) {
+        case 'monitor': {
+          const p = data.projects[S.proj];
+          return {
+            eyebrow: `${C.workingOn} · ${p.tag}`,
+            title: p.name,
+            body: p.summary,
+            actions: [
+              { label: C.viewCase, href: p.href },
+              { label: C.next, run: () => { setProject(S.proj + 1); openDialog('monitor', false); } },
+            ],
+          };
+        }
+        case 'neon':
+          return { eyebrow: '</>', title: C.projectsTitle, body: C.projectsBody, actions: [{ label: C.projectsCta, href: L.projects }] };
+        case 'bookshelf':
+          return { eyebrow: 'README.md', title: C.aboutTitle, body: C.aboutBody, actions: [{ label: C.aboutCta, href: L.about }] };
+        case 'poster':
+          return { eyebrow: 'git log', title: C.expTitle, body: C.expBody, actions: [{ label: C.expCta, href: L.experience }] };
+        case 'homelab':
+          return { eyebrow: 'docker ps', title: C.srvTitle, body: C.srvBody, actions: [{ label: C.srvCta, href: L.services }] };
+        case 'phone':
+          return { eyebrow: '● online', title: C.phoneTitle, body: C.phoneBody, actions: [{ label: C.phoneCta, href: L.contact }] };
+        case 'mug':
+          return { eyebrow: '☕', title: C.mugTitle, body: C.mugBody.replace('{n}', String(S.cups)), actions: [{ label: C.mugCta, href: L.contact }] };
+        case 'me':
+        default:
+          return {
+            eyebrow: 'Rogelio López',
+            title: C.meTitle,
+            body: C.meBody,
+            actions: [
+              { label: C.meCta1, href: L.contact },
+              { label: C.meCta2, href: L.projects },
+            ],
+          };
+      }
+    };
+
+    const openDialog = (id: string, focus = true) => {
+      const c = content(id);
+      currentId = id;
+      dEyebrow.textContent = c.eyebrow;
+      dTitle.textContent = c.title;
+      dActions.replaceChildren(
+        ...c.actions.map((a, i) => {
+          const el = document.createElement(a.href ? 'a' : 'button') as HTMLAnchorElement | HTMLButtonElement;
+          el.className = `room-action${i === 0 ? ' is-primary' : ''}`;
+          el.textContent = a.label;
+          if (a.href) {
+            (el as HTMLAnchorElement).href = a.href;
+            if (a.href.includes('#')) el.addEventListener('click', () => closeDialog(false));
+          } else {
+            (el as HTMLButtonElement).type = 'button';
+            el.addEventListener('click', () => a.run?.());
+          }
+          return el;
+        })
+      );
+      dialog.hidden = false;
+      window.clearInterval(typeTimer);
+      if (reduceMotion) {
+        dBody.textContent = c.body;
+      } else {
+        let n = 0;
+        dBody.textContent = '';
+        dBody.setAttribute('aria-label', c.body);
+        typeTimer = window.setInterval(() => {
+          n += 2;
+          dBody.textContent = c.body.slice(0, n);
+          if (n >= c.body.length) window.clearInterval(typeTimer);
+        }, 16);
+      }
+      if (focus) (dActions.firstElementChild as HTMLElement | null)?.focus({ preventScroll: true });
+    };
+
+    const closeDialog = (restore = true) => {
+      window.clearInterval(typeTimer);
+      dialog.hidden = true;
+      currentId = null;
+      if (restore) lastTrigger?.focus({ preventScroll: true });
+    };
+    dClose.addEventListener('click', () => closeDialog());
+    dBody.addEventListener('click', () => {
+      if (!currentId) return;
+      window.clearInterval(typeTimer);
+      dBody.textContent = content(currentId).body;
+    });
+    root.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !dialog.hidden) closeDialog();
+    });
+
+    // ---------- Bucle ----------
+    let raf = 0;
+    let last = performance.now();
+    let acc = 0;
+    let visible = true;
+    // Con movimiento reducido se dibuja a 4 fps y sin animaciones de personaje.
+    const FRAME = reduceMotion ? 250 : 1000 / 20;
+    const loop = (now: number) => {
+      raf = requestAnimationFrame(loop);
+      const dt = Math.min(100, now - last);
+      last = now;
+      acc += dt;
+      if (acc < FRAME) return;
+      update(acc);
+      acc = 0;
+      draw();
+    };
+    const start = () => {
+      if (raf) return;
+      last = performance.now();
+      raf = requestAnimationFrame(loop);
+    };
+    const stop = () => {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    };
+    new IntersectionObserver((entries) => {
+      visible = entries[0].isIntersecting;
+      visible && !document.hidden ? start() : stop();
+    }).observe(canvas);
+    document.addEventListener('visibilitychange', () => (document.hidden || !visible ? stop() : start()));
+
+    resize();
+    start();
+  }
+</script>
+
+<style>
+  .room {
+    width: 100%;
+  }
+
+  .room-stage {
+    position: relative;
+  }
+
+  .room-screen {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    background: #1b1d3a;
+    border: 1px solid var(--color-rule-2);
+    box-shadow: 0 1px 2px oklch(24% 0.02 258 / 0.06), 0 12px 32px -18px oklch(30% 0.08 258 / 0.45);
+  }
+
+  .room-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+  }
+
+  .room-hotspots {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hotspot {
+    position: absolute;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 2px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .hotspot:focus-visible {
+    outline: 2px dashed #fff8dc;
+    outline-offset: 1px;
+  }
+
+  .hotspot-tip {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 14px);
+    transform: translate(-50%, 4px);
+    padding: 3px 7px 4px;
+    font-family: 'Silkscreen', var(--font-mono);
+    font-size: 11px;
+    line-height: 1;
+    white-space: nowrap;
+    color: #f4f1e8;
+    background: #141733;
+    box-shadow: 0 0 0 2px #0b0d20, 0 0 0 3px #6d8bff;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out);
+    z-index: 2;
+  }
+
+  /* Objetos cerca del borde superior: el tooltip va abajo */
+  .hotspot[data-hotspot='window'] .hotspot-tip,
+  .hotspot[data-hotspot='poster'] .hotspot-tip,
+  .hotspot[data-hotspot='neon'] .hotspot-tip,
+  .hotspot[data-hotspot='me'] .hotspot-tip {
+    bottom: auto;
+    top: calc(100% + 6px);
+  }
+  .hotspot[data-hotspot='neon'] .hotspot-tip,
+  .hotspot[data-hotspot='lamp'] .hotspot-tip,
+  .hotspot[data-hotspot='homelab'] .hotspot-tip {
+    left: auto;
+    right: 0;
+    transform: translate(0, 4px);
+  }
+  .hotspot[data-hotspot='plant'] .hotspot-tip {
+    left: 0;
+    transform: translate(0, 4px);
+  }
+
+  .hotspot:hover .hotspot-tip,
+  .hotspot:focus-visible .hotspot-tip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  .hotspot[data-hotspot='neon']:hover .hotspot-tip,
+  .hotspot[data-hotspot='lamp']:hover .hotspot-tip,
+  .hotspot[data-hotspot='homelab']:hover .hotspot-tip,
+  .hotspot[data-hotspot='plant']:hover .hotspot-tip,
+  .hotspot[data-hotspot='neon']:focus-visible .hotspot-tip,
+  .hotspot[data-hotspot='lamp']:focus-visible .hotspot-tip,
+  .hotspot[data-hotspot='homelab']:focus-visible .hotspot-tip,
+  .hotspot[data-hotspot='plant']:focus-visible .hotspot-tip {
+    transform: translate(0, 0);
+  }
+
+  /* Diálogo tipo RPG */
+  .room-dialog {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 5;
+    padding: 12px 14px 12px;
+    color: #e8ecff;
+    background: #141733;
+    box-shadow:
+      0 0 0 2px #0b0d20,
+      0 0 0 4px #e8e3d6,
+      0 0 0 6px #0b0d20,
+      0 10px 24px -8px rgb(0 0 0 / 0.5);
+    animation: dlg-in 220ms var(--ease-out);
+  }
+
+  .room-dialog[hidden] {
+    display: none;
+  }
+
+  @keyframes dlg-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .room-dialog-close {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    font-family: 'Silkscreen', var(--font-mono);
+    font-size: 16px;
+    line-height: 1;
+    color: #aab4e8;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .room-dialog-close:hover {
+    color: #fff;
+  }
+
+  .room-dialog-eyebrow {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: #8fa6ff;
+    margin-bottom: 2px;
+    padding-right: 28px;
+  }
+
+  .room-dialog-title {
+    font-family: 'Silkscreen', var(--font-display);
+    font-size: 17px;
+    line-height: 1.2;
+    color: #fff8dc;
+    margin-bottom: 4px;
+    padding-right: 28px;
+  }
+
+  .room-dialog-body {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: #cfd6f5;
+    min-height: 3.1em;
+    max-width: 68ch;
+    cursor: default;
+  }
+
+  .room-dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .room-dialog-actions :global(.room-action) {
+    font-family: 'Silkscreen', var(--font-mono);
+    font-size: 12px;
+    line-height: 1;
+    padding: 7px 10px 8px;
+    color: #e8ecff;
+    background: #232850;
+    border: 0;
+    box-shadow: 0 0 0 2px #0b0d20, inset 0 -2px 0 #171a3a;
+    cursor: pointer;
+    transition: background-color var(--dur-short) var(--ease-out), transform 80ms;
+  }
+
+  .room-dialog-actions :global(.room-action.is-primary) {
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    box-shadow: 0 0 0 2px #0b0d20, inset 0 -2px 0 oklch(45% 0.2 256);
+  }
+
+  .room-dialog-actions :global(.room-action:hover) {
+    background: #2f3668;
+  }
+
+  .room-dialog-actions :global(.room-action.is-primary:hover) {
+    background: oklch(52% 0.2 256);
+  }
+
+  .room-dialog-actions :global(.room-action:active) {
+    transform: translateY(1px);
+  }
+
+  .room-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+    margin-top: var(--space-sm);
+    min-height: 1.2rem;
+  }
+
+  .room-hint,
+  .room-status {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-ink-muted);
+  }
+
+  .room-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .room-hint-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--color-accent);
+    animation: hint-blink 1.2s steps(2, jump-none) infinite;
+  }
+
+  .room-status {
+    text-align: right;
+    color: var(--color-accent);
+  }
+
+  @keyframes hint-blink {
+    0% { opacity: 1; }
+    100% { opacity: 0.2; }
+  }
+
+  /* En pantallas angostas el diálogo va debajo de la escena para no taparla. */
+  @media (max-width: 40rem) {
+    .room-screen {
+      border-radius: var(--radius-control);
+    }
+    .room-dialog {
+      position: relative;
+      left: auto;
+      right: auto;
+      bottom: auto;
+      margin: 18px 6px 6px;
+    }
+    .hotspot-tip {
+      display: none;
+    }
+    .room-dialog-title {
+      font-size: 15px;
+    }
+    .room-dialog-body {
+      font-size: 12px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .room-dialog { animation: none; }
+    .room-hint-dot { animation: none; }
+  }
+</style>
